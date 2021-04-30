@@ -2,8 +2,6 @@
 
 ---
 
-## Deprecation Notice
->Please be advised that we are sunsetting developments and any support on this Community Edition of QuickBox as we are devoted to the further developments of [QuickBox Pro](https://quickbox.io/product/quickbox-pro-subscription/). There is a lot of work daily that goes into QuickBox and I simply do not have enough time to manage the Free edition as well as the Pro edition, you can still roll with this CE, jsut keep in mind that some software may not install properly or dependencies may become deprecated. We welcome any Pull Requests from users and you are more than welcome to post patches for our review and inclusion to keep this edition going!
 ## Join the QuickBox Community!
 We love our Community, in fact, we love them so much that we want to provide every possible means for our users to come together in civilized discourse for sharing ideas, techniques, tips and tricks on just about anything, and general chit chat coupled with awesome support! We don't even have to, but we do it out of love!
 
