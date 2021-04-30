@@ -1280,9 +1280,9 @@ function _dashboard() {
 # function to install _h5ai file indexer
 function _fileindexer() {
   cd /srv/rutorrent/home
-  wget --quiet https://release.larsjung.de/h5ai/h5ai-0.29.0.zip >>"${OUTTO}" 2>&1
-  unzip h5ai-0.29.0.zip >>"${OUTTO}" 2>&1
-  rm –rf h5ai-0.29.0.zip >>"${OUTTO}" 2>&1
+  wget --quiet https://release.larsjung.de/h5ai/h5ai-0.30.0.zip >>"${OUTTO}" 2>&1
+  unzip h5ai-0.30.0.zip >>"${OUTTO}" 2>&1
+  rm –rf h5ai-0.30.0.zip >>"${OUTTO}" 2>&1
   chmod 775 -R _h5ai/private/cache && chmod 775 -R _h5ai/public/cache
   apt -y install imagemagick >>"${OUTTO}" 2>&1
   echo "#DirectoryIndex index.html index.php /_h5ai/public/index.php" >>/etc/apache2/apache2.conf
