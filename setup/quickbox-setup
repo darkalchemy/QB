@@ -509,7 +509,7 @@ function _depends() {
       apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 cfv python-pip python-dev \
                     python-software-properties libapache2-mod-scgi
     elif [[ "$CODENAME" =~ ("focal") ]]; then
-      wget http://mirrors.kernel.org/ubuntu/pool/universe/s/scgi/libapache2-mod-scgi_1.13-1.1build1_amd64.deb
+      wget -q http://mirrors.kernel.org/ubuntu/pool/universe/s/scgi/libapache2-mod-scgi_1.13-1.1build1_amd64.deb
       dpkg -i libapache2-mod-scgi_1.13-1.1build1_amd64.deb
       apt-get --fix-broken install
       rm libapache2-mod-scgi_1.13-1.1build1_amd64.deb
@@ -1292,9 +1292,9 @@ function _plugins() {
   # Needed for fileupload
   # wget http://ftp.nl.debian.org/debian/pool/main/p/plowshare/plowshare4_2.1.3-1_all.deb -O plowshare4.deb >>"${OUTTO}" 2>&1
   # wget http://ftp.nl.debian.org/debian/pool/main/p/plowshare/plowshare_2.1.3-1_all.deb -O plowshare.deb >>"${OUTTO}" 2>&1
+  # dpkg -i plowshare*.deb >>"${OUTTO}" 2>&1
+  # rm -rf plowshare*.deb >>"${OUTTO}" 2>&1
   apt-get -y install plowshare >>"${OUTTO}" 2>&1
-  dpkg -i plowshare*.deb >>"${OUTTO}" 2>&1
-  rm -rf plowshare*.deb >>"${OUTTO}" 2>&1
   cd /root
   mkdir -p /root/bin
   git clone https://github.com/mcrapet/plowshare.git ~/.plowshare-source >>"${OUTTO}" 2>&1
