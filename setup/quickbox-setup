@@ -48,7 +48,7 @@ function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15
 #################################################################################
 
 function _bashrc() {
-  cp ${local_setup}templates/bashrc.template /root/.bashrc
+  cp "${local_setup}"templates/bashrc.template /root/.bashrc
   profile="/root/.profile"
   if [ ! -f $profile ]; then
     cp ${local_setup}templates/profile.template /root/.profile
@@ -327,32 +327,32 @@ function _askdashtheme() {
 
 # ask what rtorrent version (9.1)
 function _askrtorrent() {
-  echo -e "1) rtorrent ${green}0.9.8 (with ipv6 support)${normal}"
+  echo -e "1) rtorrent ${green}0.9.6 (with ipv6 support)${normal}"
   echo -e "2) rtorrent ${green}0.9.7 (with ipv6 support)${normal}"
-  echo -e "3) rtorrent ${green}0.9.6 (with ipv6 support)${normal}"
-  echo -e "4) rtorrent ${green}0.9.4${normal}"
+  echo -e "3) rtorrent ${green}0.9.4${normal}"
+  echo -e "4) rtorrent ${green}0.9.8${normal}"
   echo -ne "${bold}${yellow}What version of rtorrent do you want?${normal} (Default ${green}1${normal}): "
   read version
   case $version in
   1 | "")
-    RTVERSION=0.9.8
-    LTORRENT=0.13.8
+    RTVERSION=0.9.6
+    LTORRENT=0.13.6
     ;;
   2)
     RTVERSION=0.9.7
     LTORRENT=0.13.7
     ;;
   3)
-    RTVERSION=0.9.6
-    LTORRENT=0.13.6
-    ;;
-  4)
     RTVERSION=0.9.4
     LTORRENT=0.13.4
     ;;
-  *)
+  4)
     RTVERSION=0.9.8
     LTORRENT=0.13.8
+    ;;
+  *)
+    RTVERSION=0.9.6
+    LTORRENT=0.13.6
     ;;
   esac
   echo "We will be using rtorrent-${green}$RTVERSION${normal}/libtorrent-${green}$LTORRENT${normal}"
