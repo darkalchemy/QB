@@ -177,7 +177,7 @@ After that access your box using a SSH client, like PuTTY.
 
 ---
 
-### Ubuntu 15.10, 16.04 & ~~16.10 || Debian 8~~
+### Ubuntu 15.10, 16.04, 18.04 and 20.04 
 
 **Run the following command to grab our latest stable release ...**
 ```

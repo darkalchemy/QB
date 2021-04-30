@@ -473,7 +473,7 @@ function _updates() {
 function _depends() {
   if [[ $DISTRO == Debian ]]; then
 	  yes '' | apt-get install -y fail2ban bc build-essential ed sudo screen zip irssi unzip nano bwm-ng htop nethogs speedtest.cli iotop git \
-                     dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev libssl-dev \
+                     dos2unix subversion dstat automake make libtool libcppunit-dev libssl-dev \
                      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-scgi libapache2-mod-fastcgi libapache2-mod-fcgid libapache2-mod-geoip libapache2-mod-php7.3 \
                      libncurses5-dev yasm pcregrep apache2 php-net-socket libapache2-mod-php7.3 \
@@ -490,7 +490,7 @@ function _depends() {
   elif [[ $DISTRO == Ubuntu ]]; then
     apt-get -y -f --allow-unauthenticated install build-essential debian-archive-keyring fail2ban bc sudo \
                      screen zip irssi unzip nano bwm-ng htop iotop git \
-                     dos2unix subversion dstat automake make mktorrent libtool libcppunit-dev \
+                     dos2unix subversion dstat automake make libtool libcppunit-dev \
                      pkg-config libxml2-dev libcurl4-openssl-dev libsigc++-2.0-dev \
                      apache2-utils autoconf cron curl libapache2-mod-scgi libapache2-mod-geoip libapache2-mod-php7.3 \
                      libncurses5-dev yasm pcregrep apache2 php-net-socket \
@@ -501,14 +501,17 @@ function _depends() {
                      libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.3 \
                      python3-lxml python-lxml ttf-mscorefonts-installer checkinstall dtach libarchive-zip-perl \
                      libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
-                     libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
+                     libxslt1.1 libxml2 libffi-dev libhtml-parser-perl libxml-libxml-perl \
                      libjson-perl libjson-xs-perl libxml-libxslt-perl zlib1g-dev \
                      vnstat vnstati openvpn >>"${OUTTO}" 2>&1
 
     if [[ "$CODENAME" =~ ("bionic") ]]; then
-      apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 cfv
+      apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 cfv python-pip python-dev
     elif [[ "$CODENAME" =~ ("focal") ]]; then
-      apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 python2
+      wget http://mirrors.kernel.org/ubuntu/pool/universe/s/scgi/libapache2-mod-scgi_1.13-1.1build1_amd64.deb
+      dpkg -i libapache2-mod-scgi_1.13-1.1build1_amd64.deb
+      rm libapache2-mod-scgi_1.13-1.1build1_amd64.deb
+      apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 python2 python2-dev
       curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
       python2 get-pip.py
       pip install cfv
