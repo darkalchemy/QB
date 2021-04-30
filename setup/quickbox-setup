@@ -125,13 +125,13 @@ function _checkkernel() {
     esac
     if [[ $kernel == yes ]]; then
       if [[ $DISTRO == Ubuntu ]]; then
-        apt-get install -q -y linux-image-generic >>"${OUTTO}" 2>&1
+        apt-get install -y linux-image-generic >>"${OUTTO}" 2>&1
       elif [[ $DISTRO == Debian ]]; then
         arch=$(uname -m)
         if [[ $arch =~ ("i686"|"i386") ]]; then
-          apt-get install -q -y linux-image-686 >>"${OUTTO}" 2>&1
+          apt-get install -y linux-image-686 >>"${OUTTO}" 2>&1
         elif [[ $arch == x86_64 ]]; then
-          apt-get install -q -y linux-image-amd64 >>"${OUTTO}" 2>&1
+          apt-get install -y linux-image-amd64 >>"${OUTTO}" 2>&1
         fi
       fi
       mv /etc/grub.d/06_OVHkernel /etc/grub.d/25_OVHkernel
@@ -158,6 +158,7 @@ function _logcheck() {
     echo "${bold}Output is being sent to /root/quickbox.${magenta}$PPID${normal}${bold}.log${normal}"
     ;;
   esac
+  # TODO what's the purpose of this?
   if [[ ! -d /root/tmp ]]; then
     sed -i 's/noexec,//g' /etc/fstab
     mount -o remount /tmp >>"${OUTTO}" 2>&1
@@ -275,7 +276,7 @@ function _locale() {
     locale-gen >>"${OUTTO}" 2>&1
   else
     apt-get -y update >>"${OUTTO}" 2>&1
-    apt-get install locales -y >>"${OUTTO}" 2>&1
+    apt-get install -y locales >>"${OUTTO}" 2>&1
     locale-gen >>"${OUTTO}" 2>&1
     export LANG="en_US.UTF-8"
     export LC_ALL="en_US.UTF-8"
@@ -325,12 +326,12 @@ function _askdashtheme() {
   echo
 }
 
-# ask what rtorrent version (9.6)
+# ask what rtorrent version (9.1)
 function _askrtorrent() {
   echo -e "1) rtorrent ${green}0.9.6 (with ipv6 support)${normal}"
-  echo -e "2) rtorrent ${green}0.9.7 (with ipv6 support)${normal}"
-  echo -e "3) rtorrent ${green}0.9.4${normal}"
-  echo -e "4) rtorrent ${green}0.9.8${normal}"
+  echo -e "2) rtorrent ${green}0.9.4 (with ipv6 support)${normal}"
+  echo -e "3) rtorrent ${green}0.9.7 (with ipv6 support)${normal}"
+  echo -e "4) rtorrent ${green}0.9.3${normal}"
   echo -ne "${bold}${yellow}What version of rtorrent do you want?${normal} (Default ${green}1${normal}): "
   read version
   case $version in
@@ -339,16 +340,16 @@ function _askrtorrent() {
     LTORRENT=0.13.6
     ;;
   2)
-    RTVERSION=0.9.7
-    LTORRENT=0.13.7
-    ;;
-  3)
     RTVERSION=0.9.4
     LTORRENT=0.13.4
     ;;
+  3)
+    RTVERSION=0.9.7
+    LTORRENT=0.13.7
+    ;;
   4)
-    RTVERSION=0.9.8
-    LTORRENT=0.13.8
+    RTVERSION=0.9.3
+    LTORRENT=0.13.3
     ;;
   *)
     RTVERSION=0.9.6
@@ -514,10 +515,9 @@ function _askbbr() {
 # package and repo addition (silently add php7) _add respo sources_
 function _repos() {
   apt-get install -y software-properties-common >>"${OUTTO}" 2>&1
-  apt-get -y install lsb-release sudo >>"${OUTTO}" 2>&1
+  apt-get install -y lsb-release sudo >>"${OUTTO}" 2>&1
   if [[ $DISTRO == Ubuntu ]]; then
-    apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449 >/dev/null 2>&1
-    LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1
+    LC_ALL=en_US.UTF-8 add-apt-repository -y ppa:ondrej/php >>"${OUTTO}" 2>&1
   fi
 
   if [[ $DISTRO == Debian ]]; then
@@ -540,15 +540,16 @@ function _updates() {
     cp ${local_setup}templates/apt.sources/debian.template /etc/apt/sources.list
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
     apt-get --yes --force-yes update >>"${OUTTO}" 2>&1
-    yes '' | apt-get install --force-yes build-essential debian-archive-keyring \
+    yes '' | apt-get install -q --force-yes build-essential debian-archive-keyring \
       python-software-properties >>"${OUTTO}" 2>&1
-    apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
+    apt-get -q --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   else
     cp ${local_setup}templates/apt.sources/ubuntu.template /etc/apt/sources.list
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
     apt-get -y update >>"${OUTTO}" 2>&1
-    apt-get -y -f install build-essential debian-archive-keyring \
-      python-software-properties >>"${OUTTO}" 2>&1
+    apt-get -y -f install build-essential debian-archive-keyring >>"${OUTTO}" 2>&1
+    apt-get -y -f install python-software-properties >>"${OUTTO}" 2>&1
+    apt-get -y -f install software-properties-common >>"${OUTTO}" 2>&1
     #apt-get -y -f --allow-unauthenticated install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   fi
 
@@ -567,6 +568,7 @@ function _updates() {
   if [[ -e /etc/ssh/sshd_config ]]; then
     echo "Port 4747" /etc/ssh/sshd_config >>/dev/null 2>&1
     sed -i 's/Port 22/Port 4747/g' /etc/ssh/sshd_config
+    sed -i 's/#Port 4747/Port 4747/g' /etc/ssh/sshd_config
     #sed -i 's/SendEnv LANG LC_*/#SendEnv LANG LC_*/g' /etc/ssh/ssh_config
     #sed -i 's/AcceptEnv LANG LC_*/#AcceptEnv LANG LC_*/g' /etc/ssh/sshd_config
     service ssh restart >>"${OUTTO}" 2>&1
@@ -597,7 +599,7 @@ function _depends() {
       libjson-perl libjson-xs-perl libxml-libxslt-perl zlib1g-dev \
       vnstat vnstati openvpn >>"${OUTTO}" 2>&1
   elif [[ $DISTRO == Ubuntu ]]; then
-    apt-get -y -f --allow-unauthenticated install build-essential debian-archive-keyring fail2ban bc sudo \
+    apt-get -q -y -f --allow-unauthenticated install build-essential debian-archive-keyring fail2ban bc sudo \
       screen zip irssi unzip nano bwm-ng htop iotop git \
       dos2unix subversion dstat automake make libtool libcppunit-dev \
       pkg-config libxml2-dev libcurl4-openssl-dev libsigc++-2.0-dev \
@@ -615,21 +617,19 @@ function _depends() {
       vnstat vnstati openvpn >>"${OUTTO}" 2>&1
 
     if [[ "$CODENAME" =~ ("bionic") ]]; then
-      apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 cfv python-pip python-dev \
-        python-software-properties libapache2-mod-scgi >>"${OUTTO}" 2>&1
+      apt-get -y install libssl-dev libapache2-mod-fcgid libcurl4 cfv python-pip python-dev \
+        libapache2-mod-scgi >>"${OUTTO}" 2>&1
     elif [[ "$CODENAME" =~ ("focal") ]]; then
       wget -q http://mirrors.kernel.org/ubuntu/pool/universe/s/scgi/libapache2-mod-scgi_1.13-1.1build1_amd64.deb
       dpkg -i libapache2-mod-scgi_1.13-1.1build1_amd64.deb >>"${OUTTO}" 2>&1
       apt-get --fix-broken install >>"${OUTTO}" 2>&1
       rm libapache2-mod-scgi_1.13-1.1build1_amd64.deb
-      apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 python2 python2-dev \
-        software-properties-common >>"${OUTTO}" 2>&1
+      apt-get -y install libssl-dev libapache2-mod-fcgid libcurl4 python2 python2-dev >>"${OUTTO}" 2>&1
       curl -s https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
       python2 get-pip.py
       pip install cfv
     else
-      apt-get -y -f --allow-unauthenticated install libssl-dev=1.0.* libapache2-mod-fastcgi libcurl3 cfv \
-        python-software-properties libapache2-mod-scgi >>"${OUTTO}" 2>&1
+      apt-get -y install libssl-dev=1.0.* libapache2-mod-fastcgi libcurl3 cfv libapache2-mod-scgi >>"${OUTTO}" 2>&1
     fi
   fi
 }
@@ -667,7 +667,7 @@ function _skel() {
   cp ./rar/*rar /usr/sbin
   rm -rf rarlinux*.tar.gz
   rm -rf ./rar
-  wget -q http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+  wget -q https://dl.miyuru.lk/geoip/maxmind/city/maxmind.dat.gz -O GeoLiteCity.dat.gz
   gunzip GeoLiteCity.dat.gz >>"${OUTTO}" 2>&1
   mkdir -p /usr/share/GeoIP >>"${OUTTO}" 2>&1
   rm -rf GeoLiteCity.dat.gz
@@ -735,7 +735,7 @@ function _qmount() {
 
 # Setup LShell configuration file
 function _lshell() {
-  apt-get -y install lshell >>/dev/null 2>&1
+  apt-get install -y lshell >>/dev/null 2>&1
   cp ${local_setup}templates/lshell.conf.template /etc/lshell.conf
 }
 
@@ -813,6 +813,7 @@ function _apachesudo() {
 
 # xmlrpc-c function
 function _xmlrpc() {
+  cd /root
   if [[ -d /root/tmp ]]; then rm -r tmp; fi
   mkdir /root/tmp && cd /root/tmp
   if [[ -d /root/tmp/xmlrpc-c ]]; then rm -rf xmlrpc-c; fi
@@ -830,6 +831,7 @@ function _xmlrpc() {
 # apt rtorrent handles the libtorrent install
 # remember this is temporary until patched
 function _libtorrent() {
+  cd /root
   if [[ -d /root/tmp ]]; then rm -r tmp; fi
   mkdir /root/tmp && cd /root/tmp
   MAXCPUS=$(echo "$(nproc) / 2" | bc)
@@ -838,6 +840,9 @@ function _libtorrent() {
   cp ${local_setup}sources/libtorrent-${LTORRENT}.tar.gz .
   tar -xzvf libtorrent-${LTORRENT}.tar.gz >>"${OUTTO}" 2>&1
   cd libtorrent-${LTORRENT}
+  if [ $LTORRENT == 0.13.6 ]; then
+    sed -i "s/AM_PATH_CPPUNIT/#AM_PATH_CPPUNIT$/g" configure.ac
+  fi
   ./autogen.sh >>"${OUTTO}" 2>&1
   if [ $LTORRENT == 0.13.4 ]; then
     cp ${local_setup}sources/libtorrent-0.13.4-tar.patch .
@@ -860,6 +865,7 @@ function _libtorrent() {
 # commenting until patch comes for comp/build
 # using apt install rtorrent in the meantime
 function _rtorrent() {
+  cd /root
   if [[ -d /root/tmp ]]; then rm -r tmp; fi
   mkdir /root/tmp && cd /root/tmp
   MAXCPUS=$(echo "$(nproc) / 2" | bc)
@@ -868,6 +874,9 @@ function _rtorrent() {
   cp ${local_setup}sources/rtorrent-${RTVERSION}.tar.gz .
   tar -xzvf rtorrent-${RTVERSION}.tar.gz >>"${OUTTO}" 2>&1
   cd rtorrent-${RTVERSION}
+  if [ $LTORRENT == 0.13.6 ]; then
+    sed -i "s/AM_PATH_CPPUNIT/#AM_PATH_CPPUNIT$/g" configure.ac
+  fi
   ./autogen.sh >>"${OUTTO}" 2>&1
   if [ $RTVERSION == 0.9.4 ]; then
     cp ${local_setup}sources/rtorrent-0.9.4-tar.patch .
@@ -1409,7 +1418,7 @@ function _plugins() {
   # wget http://ftp.nl.debian.org/debian/pool/main/p/plowshare/plowshare_2.1.3-1_all.deb -O plowshare.deb >>"${OUTTO}" 2>&1
   # dpkg -i plowshare*.deb >>"${OUTTO}" 2>&1
   # rm -rf plowshare*.deb >>"${OUTTO}" 2>&1
-  apt-get -y install plowshare >>"${OUTTO}" 2>&1
+  apt-get install -y plowshare >>"${OUTTO}" 2>&1
   cd /root
   mkdir -p /root/bin
   git clone https://github.com/mcrapet/plowshare.git ~/.plowshare-source >>"${OUTTO}" 2>&1
@@ -1551,7 +1560,7 @@ echo "    * Donate:     https://quickbox.io/donate"
 echo ""
 EOF
 
-  apt-get -y install shellinabox >>"${OUTTO}" 2>&1
+  apt-get install -y shellinabox >>"${OUTTO}" 2>&1
 
   cp ${local_setup}templates/sysd/shellinabox.template /etc/systemd/system/shellinabox.service
   cp ${local_setup}templates/quickconsole/00_QuickConsole.css.template /etc/shellinabox/options-enabled/00_QuickConsole.css
@@ -1767,7 +1776,7 @@ _ask10g
 _askrtorrent
 _askdeluge
 _asktr
-apt-get install -q -y curl >>"${OUTTO}" 2>&1
+apt-get install -y curl >>"${OUTTO}" 2>&1
 _askqb
 _askdashtheme
 _adduser
