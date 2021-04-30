@@ -36,24 +36,24 @@ function _directorycheck() {
   if [[ ! -f /install/.developer.lock ]]; then
     if [[ -d /etc/QuickBox ]]; then
       #rm -rf /etc/QuickBox
-      #git clone https://github.com/QuickBox/QB /etc/QuickBox
+      #git clone https://github.com/darkalchemy/QuickBox /etc/QuickBox
       cd /etc/QuickBox
       git checkout master >>"${OUTTO}" 2>&1;
       git reset --hard origin/master
       git pull >>"${OUTTO}" 2>&1;
     else
-      git clone https://github.com/QuickBox/QB /etc/QuickBox
+      git clone https://github.com/darkalchemy/QuickBox /etc/QuickBox
     fi
   else
     if [[ -d /etc/QuickBox ]]; then
       #rm -rf /etc/QuickBox
-      #git clone --branch "development" https://github.com/QuickBox/QB /etc/QuickBox
+      #git clone --branch "development" https://github.com/darkalchemy/QuickBox /etc/QuickBox
       cd /etc/QuickBox
       git checkout development >>"${OUTTO}" 2>&1;
       git reset --hard origin/development
       git pull >>"${OUTTO}" 2>&1;
     else
-      git clone --branch "development" https://github.com/QuickBox/QB /etc/QuickBox
+      git clone --branch "development" https://github.com/darkalchemy/QuickBox /etc/QuickBox
     fi
   fi
 }

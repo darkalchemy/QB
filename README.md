@@ -27,7 +27,7 @@ rm -rf ~/QuickBox
 ### If you are already located on the GitHub repo as of v2.4.9, run the following to easily update to the new v2.5.+ QuickBox/QB repo:
 ```
 rm -rf /etc/QuickBox; \
-git clone https://github.com/QuickBox/QB /etc/QuickBox; \
+git clone https://github.com/darkalchemy/QuickBox /etc/QuickBox; \
 wget -O /usr/local/bin/quickbox/system/updateQuickBox https://raw.githubusercontent.com/QuickBox/QB/master/packages/system/updateQuickBox; \
 dos2unix $(find /usr/local/bin/quickbox -type f) && chmod +x $(find /usr/local/bin/quickbox -type f); \
 updateQuickBox
@@ -44,7 +44,7 @@ This simply means you do not have Deluge installed, there is no further action f
 ### [2]:
 grab the current/future QuickBox repository with the following:
 ```
-git clone https://github.com/QuickBox/QB /etc/QuickBox
+git clone https://github.com/darkalchemy/QuickBox /etc/QuickBox
 ```
 
 >If you receive an error `/etc/QuickBox already exists` please perform an `rm -rf /etc/QuickBox`. You can then run the `git clone` command above to proceed.
@@ -182,7 +182,7 @@ After that access your box using a SSH client, like PuTTY.
 **Run the following command to grab our latest stable release ...**
 ```
 apt-get -yqq update; apt-get -yqq upgrade; apt-get -yqq install git lsb-release bc; \
-git clone https://github.com/QuickBox/QB /etc/QuickBox; \
+git clone https://github.com/darkalchemy/QuickBox /etc/QuickBox; \
 bash /etc/QuickBox/setup/quickbox-setup
 ```
 
@@ -193,7 +193,7 @@ bash /etc/QuickBox/setup/quickbox-setup
 ```
 mkdir /install/ && touch /install/.developer.lock; \
 apt-get -yqq update; apt-get -yqq upgrade; apt-get -yqq install git lsb-release; \
-git clone --branch "development" https://github.com/QuickBox/QB /etc/QuickBox; \
+git clone --branch "development" https://github.com/darkalchemy/QuickBox /etc/QuickBox; \
 bash /etc/QuickBox/setup/quickbox-setup
 ```
 
