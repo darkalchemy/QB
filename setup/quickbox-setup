@@ -16,15 +16,35 @@
 #
 #################################################################################
 #Script Console Colors
-black=$(tput setaf 0); red=$(tput setaf 1); green=$(tput setaf 2); yellow=$(tput setaf 3);
-blue=$(tput setaf 4); magenta=$(tput setaf 5); cyan=$(tput setaf 6); white=$(tput setaf 7);
-on_red=$(tput setab 1); on_green=$(tput setab 2); on_yellow=$(tput setab 3); on_blue=$(tput setab 4);
-on_magenta=$(tput setab 5); on_cyan=$(tput setab 6); on_white=$(tput setab 7); bold=$(tput bold);
-dim=$(tput dim); underline=$(tput smul); reset_underline=$(tput rmul); standout=$(tput smso);
-reset_standout=$(tput rmso); normal=$(tput sgr0); alert=${white}${on_red}; title=${standout};
-sub_title=${bold}${yellow}; repo_title=${black}${on_green}; message_title=${white}${on_magenta}
+black=$(tput setaf 0)
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+blue=$(tput setaf 4)
+magenta=$(tput setaf 5)
+cyan=$(tput setaf 6)
+white=$(tput setaf 7)
+on_red=$(tput setab 1)
+on_green=$(tput setab 2)
+on_yellow=$(tput setab 3)
+on_blue=$(tput setab 4)
+on_magenta=$(tput setab 5)
+on_cyan=$(tput setab 6)
+on_white=$(tput setab 7)
+bold=$(tput bold)
+dim=$(tput dim)
+underline=$(tput smul)
+reset_underline=$(tput rmul)
+standout=$(tput smso)
+reset_standout=$(tput rmso)
+normal=$(tput sgr0)
+alert=${white}${on_red}
+title=${standout}
+sub_title=${bold}${yellow}
+repo_title=${black}${on_green}
+message_title=${white}${on_magenta}
 #################################################################################
-function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
+function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15; }
 #################################################################################
 
 function _bashrc() {
@@ -51,7 +71,7 @@ function _intro() {
   echo
   echo
   echo "${green}Checking distribution ...${normal}"
-  if [ ! -x  /usr/bin/lsb_release ]; then
+  if [ ! -x /usr/bin/lsb_release ]; then
     echo "It looks like you are running $DISTRO, which is not supported by QuickBox."
     echo "Exiting..."
     exit 1
@@ -87,37 +107,57 @@ function _checkkernel() {
   if [[ -n $grsec ]]; then
     echo -e "Your server is currently running with kernel version: $(uname -r)"
     echo -e "Kernels with ${bold}grsec${normal} are not supported"
-    echo -ne "${bold}${yellow}Would you like QuickBox to install the distribution kernel?${normal} (Default: ${green}${bold}Y${normal}) "; read input
-      case $input in
-        [yY] | [yY][Ee][Ss] | "" ) kernel=yes; echo "Your distribution's default kernel will be installed. A reboot will be ${bold}required${normal}."  ;;
-        [nN] | [nN][Oo] ) echo "Installer will not continue. Exiting ... "; exit 0 ;;
-      *) kernel=yes; echo "Your distribution's default kernel will be installed. A reboot will be ${bold}required${normal}."  ;;
-      esac
-      if [[ $kernel == yes ]]; then
-        if [[ $DISTRO == Ubuntu ]]; then
-          apt-get install -q -y linux-image-generic >>"${OUTTO}" 2>&1
-        elif [[ $DISTRO == Debian ]]; then
-          arch=$(uname -m)
-          if [[ $arch =~ ("i686"|"i386") ]]; then
-            apt-get install -q -y linux-image-686 >>"${OUTTO}" 2>&1
-          elif [[ $arch == x86_64 ]]; then
-            apt-get install -q -y linux-image-amd64 >>"${OUTTO}" 2>&1
-          fi
+    echo -ne "${bold}${yellow}Would you like QuickBox to install the distribution kernel?${normal} (Default: ${green}${bold}Y${normal}) "
+    read input
+    case $input in
+    [yY] | [yY][Ee][Ss] | "")
+      kernel=yes
+      echo "Your distribution's default kernel will be installed. A reboot will be ${bold}required${normal}."
+      ;;
+    [nN] | [nN][Oo])
+      echo "Installer will not continue. Exiting ... "
+      exit 0
+      ;;
+    *)
+      kernel=yes
+      echo "Your distribution's default kernel will be installed. A reboot will be ${bold}required${normal}."
+      ;;
+    esac
+    if [[ $kernel == yes ]]; then
+      if [[ $DISTRO == Ubuntu ]]; then
+        apt-get install -q -y linux-image-generic >>"${OUTTO}" 2>&1
+      elif [[ $DISTRO == Debian ]]; then
+        arch=$(uname -m)
+        if [[ $arch =~ ("i686"|"i386") ]]; then
+          apt-get install -q -y linux-image-686 >>"${OUTTO}" 2>&1
+        elif [[ $arch == x86_64 ]]; then
+          apt-get install -q -y linux-image-amd64 >>"${OUTTO}" 2>&1
         fi
-        mv /etc/grub.d/06_OVHkernel /etc/grub.d/25_OVHkernel
-        update-grub >>"${OUTTO}" 2>&1
       fi
+      mv /etc/grub.d/06_OVHkernel /etc/grub.d/25_OVHkernel
+      update-grub >>"${OUTTO}" 2>&1
+    fi
   fi
 }
 
 # check if create log function (4)
 function _logcheck() {
-  echo -ne "${bold}${yellow}Do you wish to write to a log file?${normal} (Default: ${green}${bold}Y${normal}) "; read input
-    case $input in
-      [yY] | [yY][Ee][Ss] | "" ) OUTTO="/root/quickbox.$PPID.log";echo "${bold}Output is being sent to /root/quickbox.${magenta}$PPID${normal}${bold}.log${normal}" ;;
-      [nN] | [nN][Oo] ) OUTTO="/dev/null 2>&1";echo "${cyan}NO output will be logged${normal}" ;;
-    *) OUTTO="/root/quickbox.$PPID.log";echo "${bold}Output is being sent to /root/quickbox.${magenta}$PPID${normal}${bold}.log${normal}" ;;
-    esac
+  echo -ne "${bold}${yellow}Do you wish to write to a log file?${normal} (Default: ${green}${bold}Y${normal}) "
+  read input
+  case $input in
+  [yY] | [yY][Ee][Ss] | "")
+    OUTTO="/root/quickbox.$PPID.log"
+    echo "${bold}Output is being sent to /root/quickbox.${magenta}$PPID${normal}${bold}.log${normal}"
+    ;;
+  [nN] | [nN][Oo])
+    OUTTO="/dev/null 2>&1"
+    echo "${cyan}NO output will be logged${normal}"
+    ;;
+  *)
+    OUTTO="/root/quickbox.$PPID.log"
+    echo "${bold}Output is being sent to /root/quickbox.${magenta}$PPID${normal}${bold}.log${normal}"
+    ;;
+  esac
   if [[ ! -d /root/tmp ]]; then
     sed -i 's/noexec,//g' /etc/fstab
     mount -o remount /tmp >>"${OUTTO}" 2>&1
@@ -126,16 +166,17 @@ function _logcheck() {
 
 # setting system hostname function (5)
 function _hostname() {
-echo -ne "Please enter a hostname for this server (${bold}Hit ${standout}${green}ENTER${normal} to make no changes${normal}): " ; read input
-if [[ -z $input ]]; then
-        echo "No hostname supplied, no changes made!!"
-else
-        hostname ${input}
-        echo "${input}">/etc/hostname
-        echo "127.0.0.1 ${input}">/etc/hosts
-        echo "Hostname set to ${input}"
-fi
-echo
+  echo -ne "Please enter a hostname for this server (${bold}Hit ${standout}${green}ENTER${normal} to make no changes${normal}): "
+  read input
+  if [[ -z $input ]]; then
+    echo "No hostname supplied, no changes made!!"
+  else
+    hostname ${input}
+    echo "${input}" >/etc/hostname
+    echo "127.0.0.1 ${input}" >/etc/hosts
+    echo "Hostname set to ${input}"
+  fi
+  echo
 }
 
 ################################################################################
@@ -143,61 +184,78 @@ echo
 ################################################################################
 # setting quota function (6)
 function _askquota() {
-  echo -ne "${bold}${yellow}Do you wish to use user quotas?${normal} (Default: ${green}${bold}Y${normal}) "; read input
-    case $input in
-      [yY] | [yY][Ee][Ss] | "" ) quota="yes";echo "${bold}Quotas will be installed${normal}" ;;
-      [nN] | [nN][Oo] ) quota="no";echo "${cyan}Quotas will not be installed${normal}" ;;
-    *) quota="yes";echo "${bold}Quotas will be installed${normal}" ;;
-    esac
+  echo -ne "${bold}${yellow}Do you wish to use user quotas?${normal} (Default: ${green}${bold}Y${normal}) "
+  read input
+  case $input in
+  [yY] | [yY][Ee][Ss] | "")
+    quota="yes"
+    echo "${bold}Quotas will be installed${normal}"
+    ;;
+  [nN] | [nN][Oo])
+    quota="no"
+    echo "${cyan}Quotas will not be installed${normal}"
+    ;;
+  *)
+    quota="yes"
+    echo "${bold}Quotas will be installed${normal}"
+    ;;
+  esac
 }
 
 function _ask10g() {
-  echo -ne "${bold}${yellow}Is this a 10 gigabit server?${normal} (Default: ${green}${bold}N${normal}) "; read input
-    case $input in
-      [yY] | [yY][Ee][Ss] )   if [[ -d /install ]]; then cd /; else mkdir /install; fi;touch /install/.10g.lock;echo "${bold}The devs are officially jealous${normal}" ;;
-      [nN] | [nN][Oo] | "" ) echo "${cyan}Who can afford that stuff anyway?${normal}" ;;
-    *)  echo "${cyan}Who can afford that stuff anyway?${normal}"  ;;
-    esac
-    echo
+  echo -ne "${bold}${yellow}Is this a 10 gigabit server?${normal} (Default: ${green}${bold}N${normal}) "
+  read input
+  case $input in
+  [yY] | [yY][Ee][Ss])
+    if [[ -d /install ]]; then cd /; else mkdir /install; fi
+    touch /install/.10g.lock
+    echo "${bold}The devs are officially jealous${normal}"
+    ;;
+  [nN] | [nN][Oo] | "") echo "${cyan}Who can afford that stuff anyway?${normal}" ;;
+  *) echo "${cyan}Who can afford that stuff anyway?${normal}" ;;
+  esac
+  echo
 }
 
 # primary partition question
 function _askpartition() {
   if [[ $quota == yes ]]; then
-  echo
-  echo "##################################################################################"
-  echo "#${bold} By default the QuickBox script will initiate a build using ${green}/${normal} ${bold}as the${normal}"
-  echo "#${bold} primary partition for mounting quotas.${normal}"
-  echo "#"
-  echo "#${bold} Some providers, such as OVH and SYS force ${green}/home${normal} ${bold}as the primary mount ${normal}"
-  echo "#${bold} on their server setups. So if you have an OVH or SYS server and have not"
-  echo "#${bold} modified your partitions, it is safe to choose option ${yellow}2)${normal} ${bold}below.${normal}"
-  echo "#"
-  echo "#${bold} If you are not sure:${normal}"
-  echo "#${bold} I have listed out your current partitions below. Your mountpoint will be"
-  echo "#${bold} listed as ${green}/home${normal} ${bold}or ${green}/${normal}${bold}. ${normal}"
-  echo "#"
-  echo "#${bold} Typically, the partition with the most space assigned is your default.${normal}"
-  echo "##################################################################################"
-  echo
-  lsblk
-  echo
-  echo -e "${bold}${yellow}1)${normal} / - ${green}root mount${normal}"
-  echo -e "${bold}${yellow}2)${normal} /home - ${green}home mount${normal}"
-  echo -ne "${bold}${yellow}What is your mount point for user quotas?${normal} (Default ${green}1${normal}): "; read version
-  case $version in
-    1 | "") primaryroot=root  ;;
-    2) primaryroot=home  ;;
+    echo
+    echo "##################################################################################"
+    echo "#${bold} By default the QuickBox script will initiate a build using ${green}/${normal} ${bold}as the${normal}"
+    echo "#${bold} primary partition for mounting quotas.${normal}"
+    echo "#"
+    echo "#${bold} Some providers, such as OVH and SYS force ${green}/home${normal} ${bold}as the primary mount ${normal}"
+    echo "#${bold} on their server setups. So if you have an OVH or SYS server and have not"
+    echo "#${bold} modified your partitions, it is safe to choose option ${yellow}2)${normal} ${bold}below.${normal}"
+    echo "#"
+    echo "#${bold} If you are not sure:${normal}"
+    echo "#${bold} I have listed out your current partitions below. Your mountpoint will be"
+    echo "#${bold} listed as ${green}/home${normal} ${bold}or ${green}/${normal}${bold}. ${normal}"
+    echo "#"
+    echo "#${bold} Typically, the partition with the most space assigned is your default.${normal}"
+    echo "##################################################################################"
+    echo
+    lsblk
+    echo
+    echo -e "${bold}${yellow}1)${normal} / - ${green}root mount${normal}"
+    echo -e "${bold}${yellow}2)${normal} /home - ${green}home mount${normal}"
+    echo -ne "${bold}${yellow}What is your mount point for user quotas?${normal} (Default ${green}1${normal}): "
+    read version
+    case $version in
+    1 | "") primaryroot=root ;;
+    2) primaryroot=home ;;
     *) primaryroot=root ;;
-  esac
-  echo "Using ${green}$primaryroot mount${normal} for quotas"
-  echo
-fi
+    esac
+    echo "Using ${green}$primaryroot mount${normal} for quotas"
+    echo
+  fi
 }
 
 function _askcontinue() {
   echo
-  echo "Press ${standout}${green}ENTER${normal} when you're ready to begin or ${standout}${red}Ctrl+Z${normal} to cancel" ;read input
+  echo "Press ${standout}${green}ENTER${normal} when you're ready to begin or ${standout}${red}Ctrl+Z${normal} to cancel"
+  read input
   echo
 }
 
@@ -210,10 +268,11 @@ function _ssdpblock() {
 
 # setting locale function
 function _locale() {
-echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
-echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-  if [[ -e /usr/sbin/locale-gen ]]; then locale-gen >>"${OUTTO}" 2>&1
+  echo 'LANGUAGE="en_US.UTF-8"' >>/etc/default/locale
+  echo 'LC_ALL="en_US.UTF-8"' >>/etc/default/locale
+  echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+  if [[ -e /usr/sbin/locale-gen ]]; then
+    locale-gen >>"${OUTTO}" 2>&1
   else
     apt-get -y update >>"${OUTTO}" 2>&1
     apt-get install locales -y >>"${OUTTO}" 2>&1
@@ -232,12 +291,22 @@ function _askservices() {
   SETNAME=$(lsb_release -rc)
   echo "You are running $DISTRO $CODENAME"
   echo "This distribution has support for systemd services. "
-  echo "Would you like to enable? (recommended) (Default: ${green}${bold}Y${normal})"; read input
-    case $input in
-      [yY] | [yY][Ee][Ss] | "" ) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
-      [nN] | [nN][Oo] ) cron="yes";echo "${cyan}Cron will manage your processes${normal}" ;;
-    *) cron="no";echo "${bold}Using systemd for process management${normal}" ;;
-    esac
+  echo "Would you like to enable? (recommended) (Default: ${green}${bold}Y${normal})"
+  read input
+  case $input in
+  [yY] | [yY][Ee][Ss] | "")
+    cron="no"
+    echo "${bold}Using systemd for process management${normal}"
+    ;;
+  [nN] | [nN][Oo])
+    cron="yes"
+    echo "${cyan}Cron will manage your processes${normal}"
+    ;;
+  *)
+    cron="no"
+    echo "${bold}Using systemd for process management${normal}"
+    ;;
+  esac
   echo
 }
 
@@ -245,11 +314,12 @@ function _askservices() {
 function _askdashtheme() {
   echo -e "1) QuickBox - ${green}smoked${normal} :: Dark theme"
   echo -e "2) QuickBox - ${green}defaulted${normal} :: Light theme"
-  echo -ne "${bold}${yellow}Pick your QuickBox Dashboard Theme${normal} (Default ${green}1${normal}): "; read version
+  echo -ne "${bold}${yellow}Pick your QuickBox Dashboard Theme${normal} (Default ${green}1${normal}): "
+  read version
   case $version in
-    1 | "") dash_theme=smoked  ;;
-    2) dash_theme=defaulted  ;;
-    *) dash_theme=smoked ;;
+  1 | "") dash_theme=smoked ;;
+  2) dash_theme=defaulted ;;
+  *) dash_theme=smoked ;;
   esac
   echo "We will be using QuickBox Theme : ${green}$dash_theme${normal}"
   echo
@@ -261,13 +331,29 @@ function _askrtorrent() {
   echo -e "2) rtorrent ${green}0.9.7 (with ipv6 support)${normal}"
   echo -e "3) rtorrent ${green}0.9.6 (with ipv6 support)${normal}"
   echo -e "4) rtorrent ${green}0.9.4${normal}"
-  echo -ne "${bold}${yellow}What version of rtorrent do you want?${normal} (Default ${green}1${normal}): "; read version
+  echo -ne "${bold}${yellow}What version of rtorrent do you want?${normal} (Default ${green}1${normal}): "
+  read version
   case $version in
-    1 | "") RTVERSION=0.9.8;LTORRENT=0.13.8  ;;
-    2) RTVERSION=0.9.7;LTORRENT=0.13.7  ;;
-    3) RTVERSION=0.9.6;LTORRENT=0.13.6 ;;
-    4) RTVERSION=0.9.4;LTORRENT=0.13.4 ;;
-    *) RTVERSION=0.9.8;LTORRENT=0.13.8  ;;
+  1 | "")
+    RTVERSION=0.9.8
+    LTORRENT=0.13.8
+    ;;
+  2)
+    RTVERSION=0.9.7
+    LTORRENT=0.13.7
+    ;;
+  3)
+    RTVERSION=0.9.6
+    LTORRENT=0.13.6
+    ;;
+  4)
+    RTVERSION=0.9.4
+    LTORRENT=0.13.4
+    ;;
+  *)
+    RTVERSION=0.9.8
+    LTORRENT=0.13.8
+    ;;
   esac
   echo "We will be using rtorrent-${green}$RTVERSION${normal}/libtorrent-${green}$LTORRENT${normal}"
   echo
@@ -279,13 +365,14 @@ function _askdeluge() {
   echo -e "2) Deluge with ${green}libtorrent 1.0.x (stable)${normal}"
   echo -e "3) Deluge with ${green}libtorrent 1.1.x (stable)${normal}"
   echo -e "4) Do not install Deluge"
-  echo -ne "${bold}${yellow}What version of Deluge do you want?${normal} (Default ${green}1${normal}): "; read version
+  echo -ne "${bold}${yellow}What version of Deluge do you want?${normal} (Default ${green}1${normal}): "
+  read version
   case $version in
-    1 | "") DELUGE=REPO  ;;
-    2) DELUGE=1.0.11  ;;
-    3) DELUGE=1.1.3 ;;
-    4) DELUGE=NO ;;
-    *) DELUGE=REPO ;;
+  1 | "") DELUGE=REPO ;;
+  2) DELUGE=1.0.11 ;;
+  3) DELUGE=1.1.3 ;;
+  4) DELUGE=NO ;;
+  *) DELUGE=REPO ;;
   esac
   echo "We will be using Deluge with Libtorrent ${DELUGE}"
   echo
@@ -293,67 +380,85 @@ function _askdeluge() {
 
 # install qbittorrent question (9.3)
 function _askqb() {
-echo -e "${green}00)${normal} Do not install qBittorrent${normal}"
-echo -e "${green}01)${normal} qBittorrent ${green}3.3.16${normal}"
-echo -e "${green}02)${normal} qBittorrent ${green}4.0.4${normal}"
-echo -e "${green}03)${normal} qBittorrent ${green}4.1.3${normal}"
-echo -e "${green}04)${normal} qBittorrent ${bold}${green}latest version${normal}"
-echo -ne "${bold}${yellow}Which version of qBittorrent do you want?${normal} (Default ${green}0${normal}): " ; read -e version
+  echo -e "${green}00)${normal} Do not install qBittorrent${normal}"
+  echo -e "${green}01)${normal} qBittorrent ${green}3.3.16${normal}"
+  echo -e "${green}02)${normal} qBittorrent ${green}4.0.4${normal}"
+  echo -e "${green}03)${normal} qBittorrent ${green}4.1.3${normal}"
+  echo -e "${green}04)${normal} qBittorrent ${bold}${green}latest version${normal}"
+  echo -ne "${bold}${yellow}Which version of qBittorrent do you want?${normal} (Default ${green}0${normal}): "
+  read -e version
 
-case $version in
-    00 | 0) QBVERSION=no ;;
-    01 | 1) QBVERSION=3.3.16;qbburst=no ;;
-    02 | 2) QBVERSION=4.0.4;qbburst=no ;;
-    03 | 3) QBVERSION=4.1.3;qbburst=no ;;
-    04 | 4) QBVERSION=`curl -i -s https://www.qbittorrent.org/ | grep -Eo "Latest:.*" | grep -Eo "[0-9.]+"`;qbburst=no ;;
-    * | "") QBVERSION=no ;;
-esac
+  case $version in
+  00 | 0) QBVERSION=no ;;
+  01 | 1)
+    QBVERSION=3.3.16
+    qbburst=no
+    ;;
+  02 | 2)
+    QBVERSION=4.0.4
+    qbburst=no
+    ;;
+  03 | 3)
+    QBVERSION=4.1.3
+    qbburst=no
+    ;;
+  04 | 4)
+    QBVERSION=$(curl -i -s https://www.qbittorrent.org/ | grep -Eo "Latest:.*" | grep -Eo "[0-9.]+")
+    qbburst=no
+    ;;
+  * | "") QBVERSION=no ;;
+  esac
 
-echo "${bold}${green}qBittorrent ${QBVERSION}${normal} ${bold}will be installed${normal}" ; echo ; 
+  echo "${bold}${green}qBittorrent ${QBVERSION}${normal} ${bold}will be installed${normal}"
+  echo
 }
 
 # install transmission question (9.4)
 function _asktr() {
-  echo -ne "${bold}${yellow}Would you like to install transmission? ${normal} [y]es or [${green}n${normal}]o: "; read responce
+  echo -ne "${bold}${yellow}Would you like to install transmission? ${normal} [y]es or [${green}n${normal}]o: "
+  read responce
   case $responce in
-    [yY] | [yY][Ee][Ss]) tr=yes ;;
-    [nN] | [nN][Oo] | "" ) tr=no ;;
-    *) tr=no ;;
+  [yY] | [yY][Ee][Ss]) tr=yes ;;
+  [nN] | [nN][Oo] | "") tr=no ;;
+  *) tr=no ;;
   esac
   echo
 }
 
 # adduser function (10)
 function _adduser() {
-  theshell="/bin/bash";
-  echo "${bold}${yellow}Add a Master Account user to sudoers${normal}";
-  echo -n "Username: "; read user
-  username=$(echo "$user"|sed 's/.*/\L&/')
+  theshell="/bin/bash"
+  echo "${bold}${yellow}Add a Master Account user to sudoers${normal}"
+  echo -n "Username: "
+  read user
+  username=$(echo "$user" | sed 's/.*/\L&/')
   useradd "${username}" -m -G www-data -s "${theshell}"
-  echo -n "Password: (hit enter to generate a password) "; read 'password'
+  echo -n "Password: (hit enter to generate a password) "
+  read 'password'
   if [[ ! -z "${password}" ]]; then
     echo "setting password to ${password}"
     passwd=${password}
     echo "${username}:${passwd}" | chpasswd >>"${OUTTO}" 2>&1
-    (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
+    (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}') >>"${HTPASSWD}"
   else
     echo "setting password to ${genpass}"
     passwd=${genpass}
     echo "${username}:${passwd}" | chpasswd >>"${OUTTO}" 2>&1
-    (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}' ) >> "${HTPASSWD}"
+    (echo -n "${username}:${REALM}:" && echo -n "${username}:${REALM}:${passwd}" | md5sum | awk '{print $1}') >>"${HTPASSWD}"
   fi
-  printf "${username}:${passwd}" > /root/"$username".info.db
+  printf "${username}:${passwd}" >/root/"$username".info.db
   echo
-  ha1pass=`echo -n "${passwd}"|md5sum |cut -f1 -d' '`
+  ha1pass=$(echo -n "${passwd}" | md5sum | cut -f1 -d' ')
 }
 
 # install ffmpeg question (11)
 function _askffmpeg() {
-  echo -ne "${bold}${yellow}Would you like to install ffmpeg? (Used for screenshots)${normal} [${green}y${normal}]es or [n]o: "; read responce
+  echo -ne "${bold}${yellow}Would you like to install ffmpeg? (Used for screenshots)${normal} [${green}y${normal}]es or [n]o: "
+  read responce
   case $responce in
-    [yY] | [yY][Ee][Ss] | "" ) ffmpeg=yes ;;
-    [nN] | [nN][Oo] ) ffmpeg=no ;;
-    *) ffmpeg=yes ;;
+  [yY] | [yY][Ee][Ss] | "") ffmpeg=yes ;;
+  [nN] | [nN][Oo]) ffmpeg=no ;;
+  *) ffmpeg=yes ;;
   esac
   echo
 }
@@ -361,31 +466,34 @@ function _askffmpeg() {
 # ask user for vsftpd conf (12)
 apt install -y net-tools
 function _askvsftpd() {
-  local DEFAULTIP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1');
-  echo -ne "${bold}${yellow}Please, write your public server IP (used for ftp)${normal} (Default: ${green}${bold}$DEFAULTIP${normal}) "; read input
+  local DEFAULTIP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+  echo -ne "${bold}${yellow}Please, write your public server IP (used for ftp)${normal} (Default: ${green}${bold}$DEFAULTIP${normal}) "
+  read input
   if [[ -z "$input" ]]; then
     IP=$DEFAULTIP
   else
     IP=$input
   fi
-  
+
   echo
 }
 
 # ban public trackers [iptables option] (11)
 function _denyhosts() {
-  echo -ne "${bold}${yellow}Block Public Trackers?${normal}: [${green}y${normal}]es or [n]o: "; read responce
+  echo -ne "${bold}${yellow}Block Public Trackers?${normal}: [${green}y${normal}]es or [n]o: "
+  read responce
   case $responce in
-    [yY] | [yY][Ee][Ss] | "")
+  [yY] | [yY][Ee][Ss] | "")
 
-  echo "[ ${red}-  Blocking public trackers  -${normal} ]"
-  cp ${local_setup}templates/trackers.template /etc/trackers
-  cp ${local_setup}templates/denypublic.template /etc/cron.daily/denypublic
-  chmod +x /etc/cron.daily/denypublic
-  cat ${local_setup}templates/hostsTrackers.template >> /etc/hosts
+    echo "[ ${red}-  Blocking public trackers  -${normal} ]"
+    cp ${local_setup}templates/trackers.template /etc/trackers
+    cp ${local_setup}templates/denypublic.template /etc/cron.daily/denypublic
+    chmod +x /etc/cron.daily/denypublic
+    cat ${local_setup}templates/hostsTrackers.template >>/etc/hosts
     ;;
 
-    [nN] | [nN][Oo] ) echo "[ ${green}+  Allowing public trackers  +${normal} ]"
+  [nN] | [nN][Oo])
+    echo "[ ${green}+  Allowing public trackers  +${normal} ]"
     ;;
   esac
   echo
@@ -393,11 +501,12 @@ function _denyhosts() {
 
 # install bbr question (x)
 function _askbbr() {
-  echo -ne "${bold}${yellow}Would you like to install bbr? (Used for Congestion Control)${normal} [${green}y${normal}]es or [n]o: "; read responce
+  echo -ne "${bold}${yellow}Would you like to install bbr? (Used for Congestion Control)${normal} [${green}y${normal}]es or [n]o: "
+  read responce
   case $responce in
-    [yY] | [yY][Ee][Ss] | "" ) bbr=yes ;;
-    [nN] | [nN][Oo]) bbr=no ;;
-    *) bbr=yes ;;
+  [yY] | [yY][Ee][Ss] | "") bbr=yes ;;
+  [nN] | [nN][Oo]) bbr=no ;;
+  *) bbr=yes ;;
   esac
   echo
 }
@@ -407,18 +516,18 @@ function _repos() {
   apt-get install -y software-properties-common >>"${OUTTO}" 2>&1
   apt-get -y install lsb-release sudo >>"${OUTTO}" 2>&1
   if [[ $DISTRO == Ubuntu ]]; then
-    apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449 > /dev/null 2>&1
-    LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
+    apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449 >/dev/null 2>&1
+    LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1
   fi
 
   if [[ $DISTRO == Debian ]]; then
-    apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 > /dev/null 2>&1
+    apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 >/dev/null 2>&1
     #echo "deb http://packages.dotdeb.org $(lsb_release -sc) all" > /etc/apt/sources.list.d/dotdeb-php7-$(lsb_release -sc).list
     #echo "deb-src http://packages.dotdeb.org $(lsb_release -sc) all" >> /etc/apt/sources.list.d/dotdeb-php7-$(lsb_release -sc).list
     #wget -q https://www.dotdeb.org/dotdeb.gpg
     #sudo apt-key add dotdeb.gpg >> /dev/null 2>&1
     printf "\n" | wget -q https://packages.sury.org/php/apt.gpg -O- | apt-key add - >/dev/null 2>&1
-    cat >/etc/apt/sources.list.d/php.list<<DPHP
+    cat >/etc/apt/sources.list.d/php.list <<DPHP
 deb https://packages.sury.org/php/ $(lsb_release -sc) main
 DPHP
   fi
@@ -432,14 +541,14 @@ function _updates() {
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
     apt-get --yes --force-yes update >>"${OUTTO}" 2>&1
     yes '' | apt-get install --force-yes build-essential debian-archive-keyring \
-                             python-software-properties >>"${OUTTO}" 2>&1
+      python-software-properties >>"${OUTTO}" 2>&1
     apt-get --yes --force-yes install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   else
     cp ${local_setup}templates/apt.sources/ubuntu.template /etc/apt/sources.list
     sed -i "s/RELEASE/${CODENAME}/g" /etc/apt/sources.list
     apt-get -y update >>"${OUTTO}" 2>&1
     apt-get -y -f install build-essential debian-archive-keyring \
-                             python-software-properties >>"${OUTTO}" 2>&1
+      python-software-properties >>"${OUTTO}" 2>&1
     #apt-get -y -f --allow-unauthenticated install deb-multimedia-keyring >>"${OUTTO}" 2>&1
   fi
 
@@ -456,7 +565,7 @@ function _updates() {
   fi
 
   if [[ -e /etc/ssh/sshd_config ]]; then
-    echo "Port 4747" /etc/ssh/sshd_config >> /dev/null 2>&1
+    echo "Port 4747" /etc/ssh/sshd_config >>/dev/null 2>&1
     sed -i 's/Port 22/Port 4747/g' /etc/ssh/sshd_config
     #sed -i 's/SendEnv LANG LC_*/#SendEnv LANG LC_*/g' /etc/ssh/ssh_config
     #sed -i 's/AcceptEnv LANG LC_*/#AcceptEnv LANG LC_*/g' /etc/ssh/sshd_config
@@ -472,68 +581,68 @@ function _updates() {
 # package and repo addition _install softwares and packages_
 function _depends() {
   if [[ $DISTRO == Debian ]]; then
-	  yes '' | apt-get install -y fail2ban bc build-essential ed sudo screen zip irssi unzip nano bwm-ng htop nethogs speedtest.cli iotop git \
-                     dos2unix subversion dstat automake make libtool libcppunit-dev libssl-dev \
-                     pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
-                     apache2-utils autoconf cron curl libapache2-mod-scgi libapache2-mod-fastcgi libapache2-mod-fcgid libapache2-mod-geoip libapache2-mod-php7.3 \
-                     libncurses5-dev yasm pcregrep apache2 php-net-socket libapache2-mod-php7.3 \
-                     php-memcached memcached php7.3 php7.3-cli php7.3-curl php7.3-fpm php7.3-gd php7.3-geoip \
-                     php7.3-json php7.3-mbstring php7.3-msgpack php7.3-mysql php7.3-opcache php7.3-xml php7.3-xmlrpc \
-                     php7.3-zip libfcgi0ldbl mcrypt libmcrypt-dev \
-                     python3-lxml python-lxml fontconfig comerr-dev ca-certificates libfontconfig1-dev \
-                     libdbd-mysql-perl libdbi-perl libfontconfig1 rar unrar mediainfo ifstat \
-                     ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
-                     libnet-ssleay-perl ca-certificates-java libxslt1-dev \
-                     libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
-                     libjson-perl libjson-xs-perl libxml-libxslt-perl zlib1g-dev \
-                     vnstat vnstati openvpn >>"${OUTTO}" 2>&1
+    yes '' | apt-get install -y fail2ban bc build-essential ed sudo screen zip irssi unzip nano bwm-ng htop nethogs speedtest.cli iotop git \
+      dos2unix subversion dstat automake make libtool libcppunit-dev libssl-dev \
+      pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
+      apache2-utils autoconf cron curl libapache2-mod-scgi libapache2-mod-fastcgi libapache2-mod-fcgid libapache2-mod-geoip libapache2-mod-php7.3 \
+      libncurses5-dev yasm pcregrep apache2 php-net-socket libapache2-mod-php7.3 \
+      php-memcached memcached php7.3 php7.3-cli php7.3-curl php7.3-fpm php7.3-gd php7.3-geoip \
+      php7.3-json php7.3-mbstring php7.3-msgpack php7.3-mysql php7.3-opcache php7.3-xml php7.3-xmlrpc \
+      php7.3-zip libfcgi0ldbl mcrypt libmcrypt-dev \
+      python3-lxml python-lxml fontconfig comerr-dev ca-certificates libfontconfig1-dev \
+      libdbd-mysql-perl libdbi-perl libfontconfig1 rar unrar mediainfo ifstat \
+      ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
+      libnet-ssleay-perl ca-certificates-java libxslt1-dev \
+      libxslt1.1 libxml2 libffi-dev python-pip python-dev libhtml-parser-perl libxml-libxml-perl \
+      libjson-perl libjson-xs-perl libxml-libxslt-perl zlib1g-dev \
+      vnstat vnstati openvpn >>"${OUTTO}" 2>&1
   elif [[ $DISTRO == Ubuntu ]]; then
     apt-get -y -f --allow-unauthenticated install build-essential debian-archive-keyring fail2ban bc sudo \
-                     screen zip irssi unzip nano bwm-ng htop iotop git \
-                     dos2unix subversion dstat automake make libtool libcppunit-dev \
-                     pkg-config libxml2-dev libcurl4-openssl-dev libsigc++-2.0-dev \
-                     apache2-utils autoconf cron curl libapache2-mod-geoip libapache2-mod-php7.3 \
-                     libncurses5-dev yasm pcregrep apache2 php-net-socket \
-                     libdbd-mysql-perl libdbi-perl php-memcached memcached php7.3 php7.3-cli php7.3-curl php7.3-fpm php7.3-gd php7.3-geoip \
-                     php7.3-json php7.3-mbstring php7.3-msgpack php7.3-mysql php7.3-opcache php7.3-xml php7.3-xmlrpc \
-                     php7.3-zip libfcgi0ldbl mcrypt libmcrypt-dev \
-                     fontconfig comerr-dev ca-certificates libfontconfig1-dev \
-                     libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.3 \
-                     python3-lxml python-lxml ttf-mscorefonts-installer checkinstall dtach libarchive-zip-perl \
-                     libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
-                     libxslt1.1 libxml2 libffi-dev libhtml-parser-perl libxml-libxml-perl \
-                     libjson-perl libjson-xs-perl libxml-libxslt-perl zlib1g-dev \
-                     vnstat vnstati openvpn >>"${OUTTO}" 2>&1
+      screen zip irssi unzip nano bwm-ng htop iotop git \
+      dos2unix subversion dstat automake make libtool libcppunit-dev \
+      pkg-config libxml2-dev libcurl4-openssl-dev libsigc++-2.0-dev \
+      apache2-utils autoconf cron curl libapache2-mod-geoip libapache2-mod-php7.3 \
+      libncurses5-dev yasm pcregrep apache2 php-net-socket \
+      libdbd-mysql-perl libdbi-perl php-memcached memcached php7.3 php7.3-cli php7.3-curl php7.3-fpm php7.3-gd php7.3-geoip \
+      php7.3-json php7.3-mbstring php7.3-msgpack php7.3-mysql php7.3-opcache php7.3-xml php7.3-xmlrpc \
+      php7.3-zip libfcgi0ldbl mcrypt libmcrypt-dev \
+      fontconfig comerr-dev ca-certificates libfontconfig1-dev \
+      libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.3 \
+      python3-lxml python-lxml ttf-mscorefonts-installer checkinstall dtach libarchive-zip-perl \
+      libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
+      libxslt1.1 libxml2 libffi-dev libhtml-parser-perl libxml-libxml-perl \
+      libjson-perl libjson-xs-perl libxml-libxslt-perl zlib1g-dev \
+      vnstat vnstati openvpn >>"${OUTTO}" 2>&1
 
     if [[ "$CODENAME" =~ ("bionic") ]]; then
       apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 cfv python-pip python-dev \
-                    python-software-properties libapache2-mod-scgi >>"${OUTTO}" 2>&1
+        python-software-properties libapache2-mod-scgi >>"${OUTTO}" 2>&1
     elif [[ "$CODENAME" =~ ("focal") ]]; then
       wget -q http://mirrors.kernel.org/ubuntu/pool/universe/s/scgi/libapache2-mod-scgi_1.13-1.1build1_amd64.deb
       dpkg -i libapache2-mod-scgi_1.13-1.1build1_amd64.deb >>"${OUTTO}" 2>&1
       apt-get --fix-broken install >>"${OUTTO}" 2>&1
       rm libapache2-mod-scgi_1.13-1.1build1_amd64.deb
       apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 python2 python2-dev \
-                    software-properties-common >>"${OUTTO}" 2>&1
+        software-properties-common >>"${OUTTO}" 2>&1
       curl -s https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
       python2 get-pip.py
       pip install cfv
     else
       apt-get -y -f --allow-unauthenticated install libssl-dev=1.0.* libapache2-mod-fastcgi libcurl3 cfv \
-                    python-software-properties libapache2-mod-scgi >>"${OUTTO}" 2>&1
+        python-software-properties libapache2-mod-scgi >>"${OUTTO}" 2>&1
     fi
   fi
 }
 
 # build openssl from source to combat recent apt source updates
 function _openssl() {
-  MAXCPUS=$(echo "$(nproc) / 2"|bc)
+  MAXCPUS=$(echo "$(nproc) / 2" | bc)
   cd /root
   wget -q https://www.openssl.org/source/openssl-1.0.2p.tar.gz
   tar -zxvf openssl-1.0.2p.tar.gz >>"${OUTTO}" 2>&1
   cd openssl-1.0.2p
-  ./config -fPIC >>"${OUTTO}" 2>&1;
-  make -j${MAXCPUS} >>"${OUTTO}" 2>&1;
+  ./config -fPIC >>"${OUTTO}" 2>&1
+  make -j${MAXCPUS} >>"${OUTTO}" 2>&1
   cd /root
   rm -rf openssl-1.0.2p.tar.gz
   cd
@@ -543,14 +652,14 @@ function _openssl() {
 function _syscommands() {
   mkdir -p /usr/local/bin/quickbox
   cp -r ${local_packages}/. /usr/local/bin/quickbox
-  dos2unix $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
-  chmod +x $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1;
+  dos2unix $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1
+  chmod +x $(find /usr/local/bin/quickbox -type f) >>"${OUTTO}" 2>&1
   cp /usr/local/bin/quickbox/system/reload /usr/bin/reload
 }
 
 # install skel template
 function _skel() {
-  if [[ -d /etc/skel ]]; then rm -r /etc/skel;fi
+  if [[ -d /etc/skel ]]; then rm -r /etc/skel; fi
   mkdir /etc/skel
   cp -r ${local_setup}templates/skel/. /etc/skel
   tar xzf ${local_setup}sources/rarlinux-x64-5.5.0.tar.gz -C ./
@@ -559,12 +668,20 @@ function _skel() {
   rm -rf rarlinux*.tar.gz
   rm -rf ./rar
   wget -q http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
-  gunzip GeoLiteCity.dat.gz>>"${OUTTO}" 2>&1
-  mkdir -p /usr/share/GeoIP>>"${OUTTO}" 2>&1
+  gunzip GeoLiteCity.dat.gz >>"${OUTTO}" 2>&1
+  mkdir -p /usr/share/GeoIP >>"${OUTTO}" 2>&1
   rm -rf GeoLiteCity.dat.gz
-  mv GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat>>"${OUTTO}" 2>&1
-  (echo y;echo o conf prerequisites_policy follow;echo o conf commit)>/dev/null 2>&1|cpan Digest::SHA1 >>"${OUTTO}" 2>&1
-  (echo y;echo o conf prerequisites_policy follow;echo o conf commit)>/dev/null 2>&1|cpan Digest::SHA >>"${OUTTO}" 2>&1
+  mv GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat >>"${OUTTO}" 2>&1
+  (
+    echo y
+    echo o conf prerequisites_policy follow
+    echo o conf commit
+  ) >/dev/null 2>&1 | cpan Digest::SHA1 >>"${OUTTO}" 2>&1
+  (
+    echo y
+    echo o conf prerequisites_policy follow
+    echo o conf commit
+  ) >/dev/null 2>&1 | cpan Digest::SHA >>"${OUTTO}" 2>&1
   if [[ $DELUGE != NO ]]; then
     mkdir -p /etc/skel/.config/deluge/plugins/
     cd /etc/skel/.config/deluge/plugins/
@@ -618,22 +735,22 @@ function _qmount() {
 
 # Setup LShell configuration file
 function _lshell() {
-  apt-get -y install lshell >> /dev/null 2>&1
+  apt-get -y install lshell >>/dev/null 2>&1
   cp ${local_setup}templates/lshell.conf.template /etc/lshell.conf
 }
 
 # build function for ffmpeg
 function _ffmpeg() {
   if [[ ${ffmpeg} == "yes" ]]; then
-    apt-get -qy update >>"${OUTTO}" 2>&1;
+    apt-get -qy update >>"${OUTTO}" 2>&1
     LIST='autoconf automake cmake cmake-curses-gui build-essential mercurial libass-dev'
     for depend in $LIST; do
-      apt-get -qq -y install $depend >>"${OUTTO}" 2>&1;
+      apt-get -qq -y install $depend >>"${OUTTO}" 2>&1
     done
-    MAXCPUS=$(echo "$(nproc) / 2"|bc)
+    MAXCPUS=$(echo "$(nproc) / 2" | bc)
     mkdir /root/tmp
     cd /root/tmp
-    if [[ -d /root/tmp/ffmpeg ]]; then rm -rf ffmpeg;fi
+    if [[ -d /root/tmp/ffmpeg ]]; then rm -rf ffmpeg; fi
     git clone --depth 1 -b release/4.0 https://github.com/FFmpeg/FFmpeg.git ffmpeg >>"${OUTTO}" 2>&1
     git clone git://github.com/yasm/yasm.git ffmpeg/yasm >>"${OUTTO}" 2>&1
     git clone https://github.com/yixia/x264.git ffmpeg/x264 >>"${OUTTO}" 2>&1
@@ -668,12 +785,12 @@ function _ffmpeg() {
     export FC_CONFIG_DIR=/etc/fonts
     export FC_CONFIG_FILE=/etc/fonts/fonts.conf
     PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/root/tmp/ffmpeg/lib/pkgconfig" \
-    ./configure --enable-libfreetype --enable-filter=drawtext --enable-fontconfig \
-    --enable-libx265 --enable-libx264 --enable-gpl --enable-shared --enable-pic \
-    --extra-libs="-lpthread -lm" \
-    --extra-ldflags="-L/root/tmp/ffmpeg/lib -L/root/tmp/ffmpeg/lib/pkgconfig" \
-    --extra-cflags="-I/root/tmp/ffmpeg/include" \
-    --pkg-config-flags="--static" >>"${OUTTO}" 2>&1
+      ./configure --enable-libfreetype --enable-filter=drawtext --enable-fontconfig \
+      --enable-libx265 --enable-libx264 --enable-gpl --enable-shared --enable-pic \
+      --extra-libs="-lpthread -lm" \
+      --extra-ldflags="-L/root/tmp/ffmpeg/lib -L/root/tmp/ffmpeg/lib/pkgconfig" \
+      --extra-cflags="-I/root/tmp/ffmpeg/include" \
+      --pkg-config-flags="--static" >>"${OUTTO}" 2>&1
     make -j${MAXCPUS} >>"${OUTTO}" 2>&1
     make install >>"${OUTTO}" 2>&1
     cp /usr/local/bin/ffmpeg /usr/bin >>"${OUTTO}" 2>&1
@@ -687,17 +804,18 @@ function _apachesudo() {
   rm /etc/sudoers
   cp ${local_setup}templates/sudoers.template /etc/sudoers
   #if [[ $sudoers == "yes" ]]; then
-    awk -v username=${username} '/^root/ && !x {print username    " ALL=(ALL) NOPASSWD: ALL"; x=1} 1' /etc/sudoers > /tmp/sudoers;mv /tmp/sudoers /etc
-    echo -n "${username}" > /etc/apache2/master.txt
+  awk -v username=${username} '/^root/ && !x {print username    " ALL=(ALL) NOPASSWD: ALL"; x=1} 1' /etc/sudoers >/tmp/sudoers
+  mv /tmp/sudoers /etc
+  echo -n "${username}" >/etc/apache2/master.txt
   #fi
   cd
 }
 
 # xmlrpc-c function
 function _xmlrpc() {
-  if [[ -d /root/tmp ]]; then rm -r tmp;fi
+  if [[ -d /root/tmp ]]; then rm -r tmp; fi
   mkdir /root/tmp && cd /root/tmp
-  if [[ -d /root/tmp/xmlrpc-c ]]; then rm -rf xmlrpc-c;fi
+  if [[ -d /root/tmp/xmlrpc-c ]]; then rm -rf xmlrpc-c; fi
   cp -r ${local_setup}sources/xmlrpc-c_1-39-13/ .
   cd xmlrpc-c_1-39-13
   chmod +x configure
@@ -712,53 +830,53 @@ function _xmlrpc() {
 # apt rtorrent handles the libtorrent install
 # remember this is temporary until patched
 function _libtorrent() {
-  if [[ -d /root/tmp ]]; then rm -r tmp;fi
+  if [[ -d /root/tmp ]]; then rm -r tmp; fi
   mkdir /root/tmp && cd /root/tmp
-  MAXCPUS=$(echo "$(nproc) / 2"|bc)
-  rm -rf xmlrpc-c  >>"${OUTTO}" 2>&1
-  if [[ -e /root/tmp/libtorrent-${LTORRENT}.tar.gz ]]; then rm -rf libtorrent-${LTORRENT}.tar.gz;fi
+  MAXCPUS=$(echo "$(nproc) / 2" | bc)
+  rm -rf xmlrpc-c >>"${OUTTO}" 2>&1
+  if [[ -e /root/tmp/libtorrent-${LTORRENT}.tar.gz ]]; then rm -rf libtorrent-${LTORRENT}.tar.gz; fi
   cp ${local_setup}sources/libtorrent-${LTORRENT}.tar.gz .
   tar -xzvf libtorrent-${LTORRENT}.tar.gz >>"${OUTTO}" 2>&1
   cd libtorrent-${LTORRENT}
   ./autogen.sh >>"${OUTTO}" 2>&1
   if [ $LTORRENT == 0.13.4 ]; then
-  cp ${local_setup}sources/libtorrent-0.13.4-tar.patch .
-  patch -p1 < libtorrent-*-tar.patch >>"${OUTTO}" 2>&1
-  ./configure --disable-debug  --prefix=/usr OPENSSL_LIBS="-L/root/openssl-1.0.2p -lssl -lcrypto" OPENSSL_CFLAGS="-I/root/openssl-1.0.2p/include" --enable-ipv6 >>"${OUTTO}" 2>&1
+    cp ${local_setup}sources/libtorrent-0.13.4-tar.patch .
+    patch -p1 <libtorrent-*-tar.patch >>"${OUTTO}" 2>&1
+    ./configure --disable-debug --prefix=/usr OPENSSL_LIBS="-L/root/openssl-1.0.2p -lssl -lcrypto" OPENSSL_CFLAGS="-I/root/openssl-1.0.2p/include" --enable-ipv6 >>"${OUTTO}" 2>&1
   elif [ $LTORRENT == 0.13.6 ]; then
-  ./configure --disable-debug  --prefix=/usr OPENSSL_LIBS="-L/root/openssl-1.0.2p -lssl -lcrypto" OPENSSL_CFLAGS="-I/root/openssl-1.0.2p/include" --enable-ipv6 >>"${OUTTO}" 2>&1
+    ./configure --disable-debug --prefix=/usr OPENSSL_LIBS="-L/root/openssl-1.0.2p -lssl -lcrypto" OPENSSL_CFLAGS="-I/root/openssl-1.0.2p/include" --enable-ipv6 >>"${OUTTO}" 2>&1
   elif [ $LTORRENT == 0.13.7 ]; then
-  cp ${local_setup}sources/libtorrent-0.13.7-tar.patch .
-  patch -p1 < libtorrent-*-tar.patch >>"${OUTTO}" 2>&1
-  ./configure --disable-debug  --prefix=/usr >>"${OUTTO}" 2>&1
+    cp ${local_setup}sources/libtorrent-0.13.7-tar.patch .
+    patch -p1 <libtorrent-*-tar.patch >>"${OUTTO}" 2>&1
+    ./configure --disable-debug --prefix=/usr >>"${OUTTO}" 2>&1
   else
-  ./configure --disable-debug  --prefix=/usr OPENSSL_LIBS="-L/root/openssl-1.0.2p -lssl -lcrypto" OPENSSL_CFLAGS="-I/root/openssl-1.0.2p/include" >>"${OUTTO}" 2>&1
+    ./configure --disable-debug --prefix=/usr OPENSSL_LIBS="-L/root/openssl-1.0.2p -lssl -lcrypto" OPENSSL_CFLAGS="-I/root/openssl-1.0.2p/include" >>"${OUTTO}" 2>&1
   fi
   make -j${MAXCPUS} >>"${OUTTO}" 2>&1
   make install >>"${OUTTO}" 2>&1
 }
 
 # rtorrent function
-# commenting until patch comes for comp/build 
+# commenting until patch comes for comp/build
 # using apt install rtorrent in the meantime
 function _rtorrent() {
-  if [[ -d /root/tmp ]]; then rm -r tmp;fi
+  if [[ -d /root/tmp ]]; then rm -r tmp; fi
   mkdir /root/tmp && cd /root/tmp
-  MAXCPUS=$(echo "$(nproc) / 2"|bc)
+  MAXCPUS=$(echo "$(nproc) / 2" | bc)
   rm -rf libtorrent-${LTORRENT}* >>"${OUTTO}" 2>&1
-  if [[ -e /root/tmp/libtorrent-${LTORRENT}.tar.gz ]]; then rm -rf libtorrent-${LTORRENT}.tar.gz;fi
+  if [[ -e /root/tmp/libtorrent-${LTORRENT}.tar.gz ]]; then rm -rf libtorrent-${LTORRENT}.tar.gz; fi
   cp ${local_setup}sources/rtorrent-${RTVERSION}.tar.gz .
   tar -xzvf rtorrent-${RTVERSION}.tar.gz >>"${OUTTO}" 2>&1
   cd rtorrent-${RTVERSION}
   ./autogen.sh >>"${OUTTO}" 2>&1
   if [ $RTVERSION == 0.9.4 ]; then
-  cp ${local_setup}sources/rtorrent-0.9.4-tar.patch .
-  patch -p1 < rtorrent-*-tar.patch >>"${OUTTO}" 2>&1
-  ./configure --disable-debug  --prefix=/usr --with-xmlrpc-c --enable-ipv6 >>"${OUTTO}" 2>&1
+    cp ${local_setup}sources/rtorrent-0.9.4-tar.patch .
+    patch -p1 <rtorrent-*-tar.patch >>"${OUTTO}" 2>&1
+    ./configure --disable-debug --prefix=/usr --with-xmlrpc-c --enable-ipv6 >>"${OUTTO}" 2>&1
   elif [[ $RTVERSION == 0.9.6 ]] || [[ $RTVERSION == 0.9.7 ]]; then
-  ./configure --disable-debug  --prefix=/usr --with-xmlrpc-c --enable-ipv6 >>"${OUTTO}" 2>&1
+    ./configure --disable-debug --prefix=/usr --with-xmlrpc-c --enable-ipv6 >>"${OUTTO}" 2>&1
   else
-  ./configure --disable-debug  --prefix=/usr --with-xmlrpc-c >>"${OUTTO}" 2>&1
+    ./configure --disable-debug --prefix=/usr --with-xmlrpc-c >>"${OUTTO}" 2>&1
   fi
   make -j${MAXCPUS} >>"${OUTTO}" 2>&1
   make install >>"${OUTTO}" 2>&1
@@ -782,86 +900,86 @@ function _deluge() {
     elif [[ $DELUGE == 1.1.3 ]]; then
       LTRC=RC_1_1
     fi
-  apt-get -qy update >/dev/null 2>&1
-  LIST='build-essential checkinstall libgeoip-dev 
+    apt-get -qy update >/dev/null 2>&1
+    LIST='build-essential checkinstall libgeoip-dev 
   python python-twisted python-openssl python-setuptools intltool python-xdg python-chardet geoip-database python-notify python-pygame
   python-glade2 librsvg2-common xdg-utils python-mako'
-  for depend in $LIST; do
-    apt-get -qq -y install $depend >>"${OUTTO}" 2>&1
-  done
-  LIST='libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev libboost-python-dev'
-  for depend in $LIST; do
-    apt-get -qq -y install $depend >>"${OUTTO}" 2>&1
-  done
-  function version_qb() { test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"; }
-  if [[ ${QBVERSION} != "no" ]] && (version_qb ${QBVERSION} 4.1.3); then
-    LTRC=RC_1_1
+    for depend in $LIST; do
+      apt-get -qq -y install $depend >>"${OUTTO}" 2>&1
+    done
+    LIST='libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev libboost-python-dev'
+    for depend in $LIST; do
+      apt-get -qq -y install $depend >>"${OUTTO}" 2>&1
+    done
+    function version_qb() { test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"; }
+    if [[ ${QBVERSION} != "no" ]] && (version_qb ${QBVERSION} 4.1.3); then
+      LTRC=RC_1_1
+    fi
+    cd ${local_packages}
+    git clone -b ${LTRC} https://github.com/arvidn/libtorrent.git >>"${OUTTO}" 2>&1
+    cd libtorrent
+    cp ${local_setup}sources/libtorrent-rasterbar-${LTRC}.patch .
+    patch -p1 <libtorrent-rasterbar-${LTRC}.patch >>"${OUTTO}" 2>&1
+    ltversion=$(cat configure.ac | grep -Eo "AC_INIT\(\[libtorrent-rasterbar\],.*" | grep -Eo "[0-9.]+" | head -n1)
+    ./autotool.sh >>"${OUTTO}" 2>&1
+    ./configure --enable-python-binding --disable-debug --enable-encryption --with-libgeoip=system --with-libiconv CXXFLAGS=-std=c++11 >>"${OUTTO}" 2>&1
+    make -j$(nproc) >>"${OUTTO}" 2>&1
+    checkinstall -y --pkgversion=${ltversion} >>"${OUTTO}" 2>&1
+    ldconfig
+    cd ..
+    wget -q http://download.deluge-torrent.org/source/deluge-1.3.15.tar.gz
+    tar -zxvf deluge-1.3.15.tar.gz >>"${OUTTO}" 2>&1
+    cd deluge-1.3.15
+    python setup.py build >>"${OUTTO}" 2>&1
+    python setup.py install --install-layout=deb >>"${OUTTO}" 2>&1
+    python setup.py install_data >>"${OUTTO}" 2>&1
+    cd ..
+    rm -r {deluge-1.3.15,libtorrent}
+    rm -rf deluge-1.3.15.tar.gz
   fi
-  cd ${local_packages}
-  git clone -b ${LTRC} https://github.com/arvidn/libtorrent.git >>"${OUTTO}" 2>&1;
-  cd libtorrent
-  cp ${local_setup}sources/libtorrent-rasterbar-${LTRC}.patch .
-  patch -p1 < libtorrent-rasterbar-${LTRC}.patch >>"${OUTTO}" 2>&1
-  ltversion=`cat configure.ac | grep -Eo "AC_INIT\(\[libtorrent-rasterbar\],.*" | grep -Eo "[0-9.]+" | head -n1`
-  ./autotool.sh >>"${OUTTO}" 2>&1;
-  ./configure --enable-python-binding --disable-debug --enable-encryption --with-libgeoip=system --with-libiconv CXXFLAGS=-std=c++11 >>"${OUTTO}" 2>&1;
-  make -j$(nproc) >>"${OUTTO}" 2>&1;
-  checkinstall -y --pkgversion=${ltversion} >>"${OUTTO}" 2>&1;
-  ldconfig
-  cd ..
-  wget -q http://download.deluge-torrent.org/source/deluge-1.3.15.tar.gz
-  tar -zxvf deluge-1.3.15.tar.gz >>"${OUTTO}" 2>&1
-  cd deluge-1.3.15
-  python setup.py build >>"${OUTTO}" 2>&1
-  python setup.py install --install-layout=deb >>"${OUTTO}" 2>&1
-  python setup.py install_data >>"${OUTTO}" 2>&1
-  cd ..
-  rm -r {deluge-1.3.15,libtorrent}
-  rm -rf deluge-1.3.15.tar.gz
-fi
-n=$RANDOM
-DPORT=$((n%59000+10024))
-DWSALT=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-DWP=$(python ${local_packages}/system/deluge.Userpass.py ${passwd} ${DWSALT})
-DUDID=$(python ${local_packages}/system/deluge.addHost.py)
-# -- Secondary awk command -- #
-#DPORT=$(awk -v min=59000 -v max=69024 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
-DWPORT=$(shuf -i 10001-11000 -n 1)
-mkdir -p /home/${username}/.config/deluge/plugins
-if [[ ! -f /home/${username}/.config/deluge/plugins/ltConfig-0.2.5.0-py2.7.egg ]]; then
-  cd /home/${username}/.config/deluge/plugins/
-  wget -q https://github.com/ratanakvlun/deluge-ltconfig/releases/download/v0.3.1/ltConfig-0.3.1-py2.7.egg
-  wget -q https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/YaRSS2-1.4.3-py2.7.egg
-fi
-chmod 755 /home/${username}/.config
-chmod 755 /home/${username}/.config/deluge
-cp ${local_setup}templates/core.conf.template /home/${username}/.config/deluge/core.conf
-cp ${local_setup}templates/web.conf.template /home/${username}/.config/deluge/web.conf
-cp ${local_setup}templates/hostlist.conf.1.2.template /home/${username}/.config/deluge/hostlist.conf.1.2
-cp ${local_setup}templates/ltconfig.conf.template /home/${username}/.config/deluge/ltconfig.conf
-sed -i "s/USERNAME/${username}/g" /home/${username}/.config/deluge/core.conf
-sed -i "s/DPORT/${DPORT}/g" /home/${username}/.config/deluge/core.conf
-sed -i "s/XX/${ip}/g" /home/${username}/.config/deluge/core.conf
-sed -i "s/DWPORT/${DWPORT}/g" /home/${username}/.config/deluge/web.conf
-sed -i "s/DWSALT/${DWSALT}/g" /home/${username}/.config/deluge/web.conf
-sed -i "s/DWP/${DWP}/g" /home/${username}/.config/deluge/web.conf
-sed -i "s/DUDID/${DUDID}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
-sed -i "s/DPORT/${DPORT}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
-sed -i "s/USERNAME/${username}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
-sed -i "s/PASSWD/${passwd}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
-echo "${username}:${passwd}:10" > /home/${username}/.config/deluge/auth
-chmod 600 /home/${username}/.config/deluge/auth
-chown -R ${username}.${username} /home/${username}/.config/
-mkdir /home/${username}/dwatch
-chown ${username}: /home/${username}/dwatch
-mkdir -p /home/${username}/torrents/deluge
-chown ${username}: /home/${username}/torrents/deluge
+  n=$RANDOM
+  DPORT=$((n % 59000 + 10024))
+  DWSALT=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+  DWP=$(python ${local_packages}/system/deluge.Userpass.py ${passwd} ${DWSALT})
+  DUDID=$(python ${local_packages}/system/deluge.addHost.py)
+  # -- Secondary awk command -- #
+  #DPORT=$(awk -v min=59000 -v max=69024 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
+  DWPORT=$(shuf -i 10001-11000 -n 1)
+  mkdir -p /home/${username}/.config/deluge/plugins
+  if [[ ! -f /home/${username}/.config/deluge/plugins/ltConfig-0.2.5.0-py2.7.egg ]]; then
+    cd /home/${username}/.config/deluge/plugins/
+    wget -q https://github.com/ratanakvlun/deluge-ltconfig/releases/download/v0.3.1/ltConfig-0.3.1-py2.7.egg
+    wget -q https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/YaRSS2-1.4.3-py2.7.egg
+  fi
+  chmod 755 /home/${username}/.config
+  chmod 755 /home/${username}/.config/deluge
+  cp ${local_setup}templates/core.conf.template /home/${username}/.config/deluge/core.conf
+  cp ${local_setup}templates/web.conf.template /home/${username}/.config/deluge/web.conf
+  cp ${local_setup}templates/hostlist.conf.1.2.template /home/${username}/.config/deluge/hostlist.conf.1.2
+  cp ${local_setup}templates/ltconfig.conf.template /home/${username}/.config/deluge/ltconfig.conf
+  sed -i "s/USERNAME/${username}/g" /home/${username}/.config/deluge/core.conf
+  sed -i "s/DPORT/${DPORT}/g" /home/${username}/.config/deluge/core.conf
+  sed -i "s/XX/${ip}/g" /home/${username}/.config/deluge/core.conf
+  sed -i "s/DWPORT/${DWPORT}/g" /home/${username}/.config/deluge/web.conf
+  sed -i "s/DWSALT/${DWSALT}/g" /home/${username}/.config/deluge/web.conf
+  sed -i "s/DWP/${DWP}/g" /home/${username}/.config/deluge/web.conf
+  sed -i "s/DUDID/${DUDID}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
+  sed -i "s/DPORT/${DPORT}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
+  sed -i "s/USERNAME/${username}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
+  sed -i "s/PASSWD/${passwd}/g" /home/${username}/.config/deluge/hostlist.conf.1.2
+  echo "${username}:${passwd}:10" >/home/${username}/.config/deluge/auth
+  chmod 600 /home/${username}/.config/deluge/auth
+  chown -R ${username}.${username} /home/${username}/.config/
+  mkdir /home/${username}/dwatch
+  chown ${username}: /home/${username}/dwatch
+  mkdir -p /home/${username}/torrents/deluge
+  chown ${username}: /home/${username}/torrents/deluge
 }
 
 function _insdwApache() {
-APPNAME='deluge'
-APPDPORT=`cat /home/${username}/.config/deluge/web.conf | grep -E ".*port.*" | grep -Eo [0-9]+`
-  cat > /etc/apache2/sites-enabled/deluge.conf <<EOF
+  APPNAME='deluge'
+  APPDPORT=$(cat /home/${username}/.config/deluge/web.conf | grep -E ".*port.*" | grep -Eo [0-9]+)
+  cat >/etc/apache2/sites-enabled/deluge.conf <<EOF
 ProxyPass /$APPNAME http://localhost:$APPDPORT/
 
 <Location /$APPNAME>
@@ -885,9 +1003,9 @@ function _insTr() {
   systemctl stop transmission-daemon >>"${OUTTO}" 2>&1
   systemctl disable transmission-daemon >>"${OUTTO}" 2>&1
   mkdir -p /home/${username}/.config/transmission/blocklists >/dev/null 2>&1
-	mkdir -p /home/${username}/.config/transmission/resume >/dev/null 2>&1
-	mkdir -p /home/${username}/.config/transmission/torrents >/dev/null 2>&1
-	mkdir -p /home/${username}/torrents/transmission >/dev/null 2>&1
+  mkdir -p /home/${username}/.config/transmission/resume >/dev/null 2>&1
+  mkdir -p /home/${username}/.config/transmission/torrents >/dev/null 2>&1
+  mkdir -p /home/${username}/torrents/transmission >/dev/null 2>&1
   cp ${local_setup}templates/transmission.json.template /home/${username}/.config/transmission/settings.json
   sed -i "s/\/var\/lib\/transmission-daemon\/downloads/\/home\/${username}\/torrents\/transmission/g" /home/${username}/.config/transmission/settings.json
   sed -i "s/\/var\/lib\/transmission-daemon\/Downloads/\/home\/${username}\/torrents\/transmission\/incomplete/g" /home/${username}/.config/transmission/settings.json
@@ -912,107 +1030,106 @@ function _insTrWeb() {
   INDEX_FILE="index.html"
   TMP_FOLDER="/tmp/tr-web-control"
   PACK_NAME="src.tar.gz"
-	WEB_HOST="https://github.com/ronggang/twc-release/raw/master/"
-	DOWNLOAD_URL="$WEB_HOST$PACK_NAME"
-	INSTALL_TYPE=-1
+  WEB_HOST="https://github.com/ronggang/twc-release/raw/master/"
+  DOWNLOAD_URL="$WEB_HOST$PACK_NAME"
+  INSTALL_TYPE=-1
 
+  main() {
+    if [ ! -d "$TMP_FOLDER" ]; then
+      mkdir -p "$TMP_FOLDER"
+    fi
 
-	main() {
-	  if [ ! -d "$TMP_FOLDER" ]; then
-		mkdir -p "$TMP_FOLDER"
-	  fi
+    if [ -d "$ROOT_FOLDER" ]; then
+      echo "use arg: $ROOT_FOLDER" >>"${OUTTO}" 2>&1
+      INSTALL_TYPE=3
+      WEB_FOLDER="$ROOT_FOLDER/web"
+    else
+      findWebFolder
+    fi
+    install
+    clear
+  }
 
-	  if [ -d "$ROOT_FOLDER" ]; then
-		echo "use arg: $ROOT_FOLDER" >>"${OUTTO}" 2>&1
-		INSTALL_TYPE=3
-		WEB_FOLDER="$ROOT_FOLDER/web"
-	  else
-		findWebFolder
-	  fi
-	  install
-	  clear
-	}
+  findWebFolder() {
+    echo "Searching Transmission Web Folder..." >>"${OUTTO}" 2>&1
+    ROOT_FOLDER="/usr/local/transmission/share/transmission"
+    if [ -f /etc/fedora-release ] || [ -f "/etc/debian_version" ]; then
+      ROOT_FOLDER="/usr/share/transmission"
+    fi
 
-	findWebFolder() {
-	  echo "Searching Transmission Web Folder..."  >>"${OUTTO}" 2>&1
-	  ROOT_FOLDER="/usr/local/transmission/share/transmission"
-	  if [ -f /etc/fedora-release ] || [ -f "/etc/debian_version" ]; then
-		ROOT_FOLDER="/usr/share/transmission"
-	  fi
-		
-	  if [ $TRANSMISSION_WEB_HOME ]; then
-		echo "use TRANSMISSION_WEB_HOME: $TRANSMISSION_WEB_HOME" >>"${OUTTO}" 2>&1
-		if [ ! -d "$TRANSMISSION_WEB_HOME" ]; then
-			 mkdir -p "$TRANSMISSION_WEB_HOME"
-		  fi
-		INSTALL_TYPE=2
-	  else
-		echo "Looking for folder: $ROOT_FOLDER/web" >>"${OUTTO}" 2>&1
-		if [ -d "$ROOT_FOLDER/web" ]; then
-		  WEB_FOLDER="$ROOT_FOLDER/web"
-		  INSTALL_TYPE=1
-		  echo "Folder found. Using it." >>"${OUTTO}" 2>&1
-		else
-		  echo "Folder not found. Will search the entire /. This will take a while..." >>"${OUTTO}" 2>&1
-		  ROOT_FOLDER=`find / -name 'web' -type d 2>/dev/null| grep 'transmission/web' | sed 's/\/web$//g'`
+    if [ $TRANSMISSION_WEB_HOME ]; then
+      echo "use TRANSMISSION_WEB_HOME: $TRANSMISSION_WEB_HOME" >>"${OUTTO}" 2>&1
+      if [ ! -d "$TRANSMISSION_WEB_HOME" ]; then
+        mkdir -p "$TRANSMISSION_WEB_HOME"
+      fi
+      INSTALL_TYPE=2
+    else
+      echo "Looking for folder: $ROOT_FOLDER/web" >>"${OUTTO}" 2>&1
+      if [ -d "$ROOT_FOLDER/web" ]; then
+        WEB_FOLDER="$ROOT_FOLDER/web"
+        INSTALL_TYPE=1
+        echo "Folder found. Using it." >>"${OUTTO}" 2>&1
+      else
+        echo "Folder not found. Will search the entire /. This will take a while..." >>"${OUTTO}" 2>&1
+        ROOT_FOLDER=$(find / -name 'web' -type d 2>/dev/null | grep 'transmission/web' | sed 's/\/web$//g')
 
-		  if [ -d "$ROOT_FOLDER/web" ]; then
-			WEB_FOLDER="$ROOT_FOLDER/web"
-			INSTALL_TYPE=1
-		  fi
-		fi
-	  fi
-	}
+        if [ -d "$ROOT_FOLDER/web" ]; then
+          WEB_FOLDER="$ROOT_FOLDER/web"
+          INSTALL_TYPE=1
+        fi
+      fi
+    fi
+  }
 
-	install() {
-	  if [ $INSTALL_TYPE = 1 -o $INSTALL_TYPE = 3 ]; then
-		download
-		echo "Installing..." >>"${OUTTO}" 2>&1
-		mkdir web
-		tar -xzf "$PACK_NAME" -C "web" >>"${OUTTO}" 2>&1
-		if [ ! -f "$WEB_FOLDER/$ORG_INDEX_FILE" ]; then
-		  mv "$WEB_FOLDER/$INDEX_FILE" "$WEB_FOLDER/$ORG_INDEX_FILE"
-		fi
-		cp -r web "$ROOT_FOLDER"
+  install() {
+    if [ $INSTALL_TYPE = 1 -o $INSTALL_TYPE = 3 ]; then
+      download
+      echo "Installing..." >>"${OUTTO}" 2>&1
+      mkdir web
+      tar -xzf "$PACK_NAME" -C "web" >>"${OUTTO}" 2>&1
+      if [ ! -f "$WEB_FOLDER/$ORG_INDEX_FILE" ]; then
+        mv "$WEB_FOLDER/$INDEX_FILE" "$WEB_FOLDER/$ORG_INDEX_FILE"
+      fi
+      cp -r web "$ROOT_FOLDER"
 
-		find "$ROOT_FOLDER" -type d -exec chmod o+rx {} \;
-		find "$ROOT_FOLDER" -type f -exec chmod o+r {} \;
+      find "$ROOT_FOLDER" -type d -exec chmod o+rx {} \;
+      find "$ROOT_FOLDER" -type f -exec chmod o+r {} \;
 
-		installed
-	  elif [ $INSTALL_TYPE = 2 ]; then
-		download
-		echo "Installing..." >>"${OUTTO}" 2>&1
-		tar -xzf "$PACK_NAME" -C "$TRANSMISSION_WEB_HOME"
+      installed
+    elif [ $INSTALL_TYPE = 2 ]; then
+      download
+      echo "Installing..." >>"${OUTTO}" 2>&1
+      tar -xzf "$PACK_NAME" -C "$TRANSMISSION_WEB_HOME"
 
-		find "$TRANSMISSION_WEB_HOME" -type d -exec chmod o+rx {} \;
-		find "$TRANSMISSION_WEB_HOME" -type f -exec chmod o+r {} \;
+      find "$TRANSMISSION_WEB_HOME" -type d -exec chmod o+rx {} \;
+      find "$TRANSMISSION_WEB_HOME" -type f -exec chmod o+r {} \;
 
-		installed
-	  else
-			#echo "##############################################"
-			#echo "#"
-			echo "# ERROR : Transmisson WEB UI Folder is missing." >>"${OUTTO}" 2>&1
-			#echo "#"
-			#echo "##############################################"
-	  fi
-	}
+      installed
+    else
+      #echo "##############################################"
+      #echo "#"
+      echo "# ERROR : Transmisson WEB UI Folder is missing." >>"${OUTTO}" 2>&1
+    #echo "#"
+    #echo "##############################################"
+    fi
+  }
 
-	download() {
-	  cd "$TMP_FOLDER"
-	  echo "Downloading Transmission Web Control..." >>"${OUTTO}" 2>&1
-	  wget -q "$DOWNLOAD_URL" --no-check-certificate
-	}
+  download() {
+    cd "$TMP_FOLDER"
+    echo "Downloading Transmission Web Control..." >>"${OUTTO}" 2>&1
+    wget -q "$DOWNLOAD_URL" --no-check-certificate
+  }
 
-	installed() {
-	  echo "Transmission Web Control Installation completed!" >>"${OUTTO}" 2>&1
-	}
+  installed() {
+    echo "Transmission Web Control Installation completed!" >>"${OUTTO}" 2>&1
+  }
 
-	clear() {
-	  rm "$PACK_NAME"
-	  rm -rf "$TMP_FOLDER"
-	}
+  clear() {
+    rm "$PACK_NAME"
+    rm -rf "$TMP_FOLDER"
+  }
 
-	main
+  main
 
   rm -rf "$tmpFolder"
   #touch /install/.transmission.lock
@@ -1021,9 +1138,9 @@ function _insTrWeb() {
 }
 
 function _insTrApache() {
-APPNAME='transmission'
-APPDPORT='9091'
-  cat > /etc/apache2/sites-enabled/transmission.conf <<EOF
+  APPNAME='transmission'
+  APPDPORT='9091'
+  cat >/etc/apache2/sites-enabled/transmission.conf <<EOF
 <Location /$APPNAME>
 ProxyPass http://localhost:$APPDPORT/$APPNAME
 ProxyPassReverse http://localhost:$APPDPORT/$APPNAME
@@ -1032,20 +1149,20 @@ EOF
 
   touch /install/.transmission.lock
   chown www-data: /etc/apache2/sites-enabled/transmission.conf
-  cat > /usr/share/transmission/web/.htaccess <<EOF
+  cat >/usr/share/transmission/web/.htaccess <<EOF
 allow from all
 EOF
-  cp ${local_setup}templates/sysd/transmission.template  /etc/systemd/system/transmission@.service >/dev/null 2>&1
+  cp ${local_setup}templates/sysd/transmission.template /etc/systemd/system/transmission@.service >/dev/null 2>&1
   systemctl enable transmission@${username} >/dev/null 2>&1
   systemctl start transmission@${username} >/dev/null 2>&1
 }
 
 # qBittorrent function
 function _qbittorrent() {
-  apt-get -qy update >>"${OUTTO}" 2>&1;
+  apt-get -qy update >>"${OUTTO}" 2>&1
   LIST='build-essential checkinstall pkg-config libgl1-mesa-dev libjpeg-dev libpng-dev automake libtool libgeoip-dev python3-dev python3-pip'
   for depend in $LIST; do
-    apt-get -qq -y install $depend >>"${OUTTO}" 2>&1;
+    apt-get -qq -y install $depend >>"${OUTTO}" 2>&1
   done
   LIST='libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev libboost-python-dev'
   for depend in $LIST; do
@@ -1057,38 +1174,38 @@ function _qbittorrent() {
     if [[ ${QBVERSION} != "no" ]] && (version_qb ${QBVERSION} 4.1.3); then
       LTRC=RC_1_1
     fi
-    git clone -b ${LTRC} https://github.com/arvidn/libtorrent.git >>"${OUTTO}" 2>&1;
+    git clone -b ${LTRC} https://github.com/arvidn/libtorrent.git >>"${OUTTO}" 2>&1
     cd libtorrent
-	  cp ${local_setup}sources/libtorrent-rasterbar-${LTRC}.patch .
-    patch -p1 < libtorrent-rasterbar-${LTRC}.patch >>"${OUTTO}" 2>&1
-    ltversion=`cat configure.ac | grep -Eo "AC_INIT\(\[libtorrent-rasterbar\],.*" | grep -Eo "[0-9.]+" | head -n1`
-    ./autotool.sh >>"${OUTTO}" 2>&1;
-    ./configure --enable-python-binding --disable-debug --enable-encryption --with-libgeoip=system --with-libiconv CXXFLAGS=-std=c++11 >>"${OUTTO}" 2>&1;
-    make -j$(nproc) >>"${OUTTO}" 2>&1;
-    checkinstall -y --pkgversion=${ltversion} >>"${OUTTO}" 2>&1;
+    cp ${local_setup}sources/libtorrent-rasterbar-${LTRC}.patch .
+    patch -p1 <libtorrent-rasterbar-${LTRC}.patch >>"${OUTTO}" 2>&1
+    ltversion=$(cat configure.ac | grep -Eo "AC_INIT\(\[libtorrent-rasterbar\],.*" | grep -Eo "[0-9.]+" | head -n1)
+    ./autotool.sh >>"${OUTTO}" 2>&1
+    ./configure --enable-python-binding --disable-debug --enable-encryption --with-libgeoip=system --with-libiconv CXXFLAGS=-std=c++11 >>"${OUTTO}" 2>&1
+    make -j$(nproc) >>"${OUTTO}" 2>&1
+    checkinstall -y --pkgversion=${ltversion} >>"${OUTTO}" 2>&1
   fi
-  ldconfig >>"${OUTTO}" 2>&1;
-  apt-get -qy update >>"${OUTTO}" 2>&1;
+  ldconfig >>"${OUTTO}" 2>&1
+  apt-get -qy update >>"${OUTTO}" 2>&1
   LIST='qtbase5-dev qttools5-dev-tools libqt5svg5-dev'
   for depend in $LIST; do
-    apt-get -qq -y install $depend >>"${OUTTO}" 2>&1;
+    apt-get -qq -y install $depend >>"${OUTTO}" 2>&1
   done
   cd ${local_packages}
-  git clone https://github.com/qbittorrent/qBittorrent >>"${OUTTO}" 2>&1;
+  git clone https://github.com/qbittorrent/qBittorrent >>"${OUTTO}" 2>&1
   cd qBittorrent
   git checkout release-$QBVERSION >>"${OUTTO}" 2>&1
-  ./configure --disable-gui --disable-debug >>"${OUTTO}" 2>&1;
-  make -j$(nproc) >>"${OUTTO}" 2>&1;
-  checkinstall -y --pkgname=qbittorrent-headless --pkgversion=$QBVERSION --pkggroup qbittorrent >>"${OUTTO}" 2>&1;
+  ./configure --disable-gui --disable-debug >>"${OUTTO}" 2>&1
+  make -j$(nproc) >>"${OUTTO}" 2>&1
+  checkinstall -y --pkgname=qbittorrent-headless --pkgversion=$QBVERSION --pkggroup qbittorrent >>"${OUTTO}" 2>&1
   export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
   if [[ ! -d /home/${username}/.config/qBittorrent ]]; then
     mkdir -p /home/${username}/.config/qBittorrent
   fi
   chmod -R 755 /home/${username}/.config
   chown -R ${username}.${username} /home/${username}/.config/
-  cp ${local_setup}templates/sysd/qbittorrent.template  /etc/systemd/system/qbittorrent@.service >/dev/null 2>&1
+  cp ${local_setup}templates/sysd/qbittorrent.template /etc/systemd/system/qbittorrent@.service >/dev/null 2>&1
   if [ ! -d /home/${username}/.config/qBittorrent ]; then
-	mkdir -p /home/${username}/.config/qBittorrent
+    mkdir -p /home/${username}/.config/qBittorrent
   fi
   cp -f ${local_setup}templates/qBittorrent.conf.template /home/${username}/.config/qBittorrent/qBittorrent.conf
   sed -i "s/admin/${username}/g" /home/${username}/.config/qBittorrent/qBittorrent.conf
@@ -1105,9 +1222,9 @@ function _qbittorrent() {
 }
 
 function _insqBApache() {
-APPNAME='qbittorrent'
-APPDPORT='8086'
-  cat > /etc/apache2/sites-enabled/qbittorrent.conf <<EOF
+  APPNAME='qbittorrent'
+  APPDPORT='8086'
+  cat >/etc/apache2/sites-enabled/qbittorrent.conf <<EOF
 <Location /$APPNAME>
 ProxyPass http://localhost:$APPDPORT
 ProxyPassReverse http://localhost:$APPDPORT
@@ -1124,11 +1241,11 @@ EOF
 
 # mktorrent function
 function _mktorrent() {
-  if [[ -d /root/tmp ]]; then rm -r tmp;fi
+  if [[ -d /root/tmp ]]; then rm -r tmp; fi
   mkdir /root/tmp && cd /root/tmp
   mktorrent_version=1.1
-  wget --quiet https://github.com/Rudde/mktorrent/archive/refs/tags/v$mktorrent_version.zip -O mktorrent.zip  >>"${OUTTO}" 2>&1
-  unzip -o mktorrent.zip  >>"${OUTTO}" 2>&1
+  wget --quiet https://github.com/Rudde/mktorrent/archive/refs/tags/v$mktorrent_version.zip -O mktorrent.zip >>"${OUTTO}" 2>&1
+  unzip -o mktorrent.zip >>"${OUTTO}" 2>&1
   cd mktorrent-1.1
   make >>"${OUTTO}" 2>&1
   make install >>"${OUTTO}" 2>&1
@@ -1139,17 +1256,17 @@ function _mktorrent() {
 # function to install rutorrent
 function _rutorrent() {
   cd /srv
-  if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent;fi
+  if [[ -d /srv/rutorrent ]]; then rm -rf rutorrent; fi
   mkdir rutorrent
   cp -r ${local_rutorrent}/. rutorrent
 }
 
 function _rutorrent-plugins() {
   cd /srv/rutorrent
-  if [[ -d /srv/rutorrent/plugins ]]; then rm -rf plugins;fi
+  if [[ -d /srv/rutorrent/plugins ]]; then rm -rf plugins; fi
   mkdir plugins
   cp -R ${local_rplugins}/. plugins
-  apt-get install -y sox libsox-fmt-mp3  >>"${OUTTO}" 2>&1
+  apt-get install -y sox libsox-fmt-mp3 >>"${OUTTO}" 2>&1
 }
 
 # function to install dashboard
@@ -1168,16 +1285,16 @@ function _fileindexer() {
   rm –rf h5ai-0.29.0.zip >>"${OUTTO}" 2>&1
   chmod 775 -R _h5ai/private/cache && chmod 775 -R _h5ai/public/cache
   apt -y install imagemagick >>"${OUTTO}" 2>&1
-  echo "#DirectoryIndex index.html index.php /_h5ai/public/index.php" >> /etc/apache2/apache2.conf
+  echo "#DirectoryIndex index.html index.php /_h5ai/public/index.php" >>/etc/apache2/apache2.conf
   ln -s /home/${username}/torrents/rtorrent/ ${username}.rtorrent.downloads
   if [[ $DELUGE != NO ]]; then
-  ln -s /home/${username}/torrents/deluge/ ${username}.deluge.downloads
+    ln -s /home/${username}/torrents/deluge/ ${username}.deluge.downloads
   fi
   if [[ ${tr} == "yes" ]]; then
-	ln -s /home/${username}/torrents/transmission/ ${username}.transmission.downloads
+    ln -s /home/${username}/torrents/transmission/ ${username}.transmission.downloads
   fi
   if [[ ${QBVERSION} != "no" ]]; then
-	ln -s /home/${username}/torrents/qbittorrent/ ${username}.qbittorrent.downloads
+    ln -s /home/${username}/torrents/qbittorrent/ ${username}.qbittorrent.downloads
   fi
 }
 
@@ -1198,49 +1315,47 @@ function _apacheconf() {
   sed -i "s/ServerTokens OS/ServerTokens Prod/g" /etc/apache2/conf-enabled/security.conf
   sed -i "s/ServerSignature On/ServerSignature Off/g" /etc/apache2/conf-enabled/security.conf
   cp ${local_setup}templates/fileshare.conf.template /etc/apache2/sites-enabled/fileshare.conf
-    sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
-               -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
-               -e "s/expose_php = On/expose_php = Off/" \
-               -e "s/128M/768M/" \
-               -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
-               -e "s/;opcache.enable=0/opcache.enable=1/" \
-               -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
-               -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.3/fpm/php.ini
-    sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
-               -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
-               -e "s/expose_php = On/expose_php = Off/" \
-               -e "s/memory_limit = 128M/memory_limit = 768M/" \
-               -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
-               -e "s/;opcache.enable=0/opcache.enable=1/" \
-               -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
-               -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.3/apache2/php.ini
+  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
+    -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
+    -e "s/expose_php = On/expose_php = Off/" \
+    -e "s/128M/768M/" \
+    -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
+    -e "s/;opcache.enable=0/opcache.enable=1/" \
+    -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
+    -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
+    -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.3/fpm/php.ini
+  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
+    -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
+    -e "s/expose_php = On/expose_php = Off/" \
+    -e "s/memory_limit = 128M/memory_limit = 768M/" \
+    -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
+    -e "s/;opcache.enable=0/opcache.enable=1/" \
+    -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
+    -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
+    -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.3/apache2/php.ini
 
-    # ensure opcache module is activated
-    phpenmod -v 7.3 opcache >>"${OUTTO}" 2>&1
+  # ensure opcache module is activated
+  phpenmod -v 7.3 opcache >>"${OUTTO}" 2>&1
 
-    # these modules are purely experimental
-    #a2enmod proxy_fcgi >>"${OUTTO}" 2>&1
-    #a2dismod mpm_prefork >>"${OUTTO}" 2>&1
-    #a2enmod mpm_worker >>"${OUTTO}" 2>&1
+  # these modules are purely experimental
+  #a2enmod proxy_fcgi >>"${OUTTO}" 2>&1
+  #a2dismod mpm_prefork >>"${OUTTO}" 2>&1
+  #a2enmod mpm_worker >>"${OUTTO}" 2>&1
 
-    # ensure fastcgi module is activated
-    a2enmod actions >>"${OUTTO}" 2>&1
-    a2enmod headers >>"${OUTTO}" 2>&1
-    a2enmod fastcgi >>"${OUTTO}" 2>&1
-    a2enmod proxy_fcgi setenvif >>"${OUTTO}" 2>&1
-    a2enconf php7.3-fpm >>"${OUTTO}" 2>&1
+  # ensure fastcgi module is activated
+  a2enmod actions >>"${OUTTO}" 2>&1
+  a2enmod headers >>"${OUTTO}" 2>&1
+  a2enmod fastcgi >>"${OUTTO}" 2>&1
+  a2enmod proxy_fcgi setenvif >>"${OUTTO}" 2>&1
+  a2enconf php7.3-fpm >>"${OUTTO}" 2>&1
 
-
-    #sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.3/apache2/php.ini
+  #sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.3/apache2/php.ini
 }
 
 # function to fix cert
 # add by EFS
 function _fix_cert() {
-  if [ ! -f /etc/ssl/certs/ssl-cert-snakeoila.pem ]
-  then 
+  if [ ! -f /etc/ssl/certs/ssl-cert-snakeoila.pem ]; then
     openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/C=CN/ST=BJ/L=PRC/O=IT/CN=www.example.com" >>"${OUTTO}" 2>&1
   fi
 }
@@ -1248,9 +1363,9 @@ function _fix_cert() {
 # function to configure first user config
 function _rconf() {
   if [[ $RTVERSION == 0.9.7 ]]; then
-	cp ${local_setup}templates/rtorrent.rc.new.template /home/${username}/.rtorrent.rc
+    cp ${local_setup}templates/rtorrent.rc.new.template /home/${username}/.rtorrent.rc
   else
-	cp ${local_setup}templates/rtorrent.rc.template /home/${username}/.rtorrent.rc
+    cp ${local_setup}templates/rtorrent.rc.template /home/${username}/.rtorrent.rc
   fi
   mkdir -p /home/${username}/torrents/rtorrent
   chown -R ${username}: /home/${username}/torrents
@@ -1326,7 +1441,7 @@ function _autodl() {
   chown ${username}: /home/${username}/.autodl/autodl.cfg
   touch /install/.autodlirssi.lock
 
-cat >"/home/${username}/.autodl/autodl2.cfg"<<ADC
+  cat >"/home/${username}/.autodl/autodl2.cfg" <<ADC
 [options]
 gui-server-port = ${AUTODLPORT}
 gui-server-password = ${AUTODLPASSWORD}
@@ -1392,21 +1507,21 @@ function _ftpdconfig() {
   # Enabling passive mode
   sed -i 's/^\(pasv_min_port=\).*/\110090/' /etc/vsftpd.conf
   sed -i 's/^\(pasv_max_port=\).*/\110100/' /etc/vsftpd.conf
-  echo "pasv_address="$IP >> /etc/vsftpd.conf
+  echo "pasv_address="$IP >>/etc/vsftpd.conf
   iptables -I INPUT -p tcp --destination-port 10090:10100 -j ACCEPT
 
-  echo "" > /etc/vsftpd.chroot_list
+  echo "" >/etc/vsftpd.chroot_list
 }
 
 # The following function makes necessary changes to Network and TZ settings needed for
 # the proper functionality of the QuickBox Dashboard.
 function _quickstats() {
   # Dynamically adjust to use the servers active network adapter
-  printf "${IFACE}" > /srv/rutorrent/home/db/interface.txt
-  printf "${username}" > /srv/rutorrent/home/db/master.txt
+  printf "${IFACE}" >/srv/rutorrent/home/db/interface.txt
+  printf "${username}" >/srv/rutorrent/home/db/master.txt
   # Use server timezone
   cd /usr/share/zoneinfo
-  find * -type f -exec sh -c "diff -q /etc/localtime '{}' > /dev/null && echo {}" \; > ~/tz.txt
+  find * -type f -exec sh -c "diff -q /etc/localtime '{}' > /dev/null && echo {}" \; >~/tz.txt
   cd ~
   LOCALE=en_GB.UTF-8
   LANG=lang_en
@@ -1428,7 +1543,7 @@ function _quickstats() {
 function _quickconsole() {
   PUBLICIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $7}')
 
-cat >/etc/profile<<EOF
+  cat >/etc/profile <<EOF
 echo " Welcome Back !"
 echo "    * Dashboard:  https://${PUBLICIP}"
 echo "    * Support:    https://plaza.quickbox.io"
@@ -1436,7 +1551,7 @@ echo "    * Donate:     https://quickbox.io/donate"
 echo ""
 EOF
 
-  apt-get -y install shellinabox >>"${OUTTO}" 2>&1;
+  apt-get -y install shellinabox >>"${OUTTO}" 2>&1
 
   cp ${local_setup}templates/sysd/shellinabox.template /etc/systemd/system/shellinabox.service
   cp ${local_setup}templates/quickconsole/00_QuickConsole.css.template /etc/shellinabox/options-enabled/00_QuickConsole.css
@@ -1470,7 +1585,7 @@ function _boot() {
   systemctl start {rtorrent,irssi,deluged,deluge-web}@${username} >/dev/null 2>&1
   #fi
 
-  echo "*/1 * * * * root bash /usr/local/bin/quickbox/system/set_interface" > /etc/cron.d/set_interface
+  echo "*/1 * * * * root bash /usr/local/bin/quickbox/system/set_interface" >/etc/cron.d/set_interface
 }
 
 # function to set permissions on first user
@@ -1481,8 +1596,8 @@ function _perms() {
   chmod 777 /home/${username}/.sessions >/dev/null 2>&1
   chown -R chown -R www-data:www-data /srv/rutorrent/home >/dev/null 2>&1
   if [[ ${tr} == "yes" ]]; then
-	chown -R ${username}:debian-transmission /home/${username}/torrents/transmission >/dev/null 2>&1
-	service transmission-daemon reload >>"${OUTTO}" 2>&1
+    chown -R ${username}:debian-transmission /home/${username}/torrents/transmission >/dev/null 2>&1
+    service transmission-daemon reload >>"${OUTTO}" 2>&1
   fi
 }
 
@@ -1517,11 +1632,12 @@ function _askshell() {
   #  [nN] | [nN][Oo] | "" ) theshell="/bin/bash" ;;
   #  *) theshell="yes" ;;
   #esac
-  echo -ne "${bold}${yellow}Add user to /etc/sudoers${normal} [${green}y${normal}]es or [n]o: "; read answer
+  echo -ne "${bold}${yellow}Add user to /etc/sudoers${normal} [${green}y${normal}]es or [n]o: "
+  read answer
   case $answer in
-    [yY] | [yY][Ee][Ss] | "" ) sudoers="yes" ;;
-    [nN] | [nN][Oo] ) sudoers="no" ;;
-    *) sudoers="yes" ;;
+  [yY] | [yY][Ee][Ss] | "") sudoers="yes" ;;
+  [nN] | [nN][Oo]) sudoers="no" ;;
+  *) sudoers="yes" ;;
   esac
 }
 
@@ -1540,7 +1656,8 @@ function _finished() {
   echo
   echo -e " ${black}${on_green}    [quickbox] Seedbox & GUI Installation Completed    ${normal} "
   echo -e "        ${standout}    INSTALLATION COMPLETED in ${FIN}/min    ${normal}             "
-  echo;echo
+  echo
+  echo
   echo "  Valid Commands:  "
   echo '  -------------------'
   echo
@@ -1556,49 +1673,52 @@ function _finished() {
   echo -e " ${green}box install letsencrypt${normal} - installs a valid SSL certificate to be used with "
   echo -e "                           a valid domain name. "
   echo -e " ${green}box${normal} - type 'box -h' for a summary of how to use box!"
-  echo;echo;echo
+  echo
+  echo
+  echo
   echo '################################################################################################'
   echo "#   Seedbox can be found at https://${username}:${passwd}@${ip} "
   echo "#   ${cyan}(Also works for FTP:5757/SSH:4747)${normal}"
   echo "#   If you need to restart rtorrent/irssi, you can type 'reload'"
-  echo "#   https://${username}:${passwd}@${ip} (Also works for FTP:5757/SSH:4747)" > ${username}.info
+  echo "#   https://${username}:${passwd}@${ip} (Also works for FTP:5757/SSH:4747)" >${username}.info
   echo "#   Reloading: ${green}sshd${normal}, ${green}apache${normal}, ${green}memcached${normal}, ${green}php7.3${normal}, ${green}vsftpd${normal} and ${green}fail2ban${normal}"
   echo '################################################################################################'
   echo
 
-cat >/root/information.info<<EOF
+  cat >/root/information.info <<EOF
   Seedbox can be found at https://${username}:${passwd}@${ip} (Also works for FTP:5757/SSH:4747)
   If you need to restart rtorrent/irssi, you can type 'reload'
   https://${username}:${passwd}@${ip} (Also works for FTP:5757/SSH:4747)
 EOF
   rm -rf "$0" >>"${OUTTO}" 2>&1
-    for i in ssh apache2 php7.3-fpm vsftpd fail2ban quota memcached cron; do
-      service $i restart >>"${OUTTO}" 2>&1
-      systemctl enable $i >>"${OUTTO}" 2>&1
-    done
+  for i in ssh apache2 php7.3-fpm vsftpd fail2ban quota memcached cron; do
+    service $i restart >>"${OUTTO}" 2>&1
+    systemctl enable $i >>"${OUTTO}" 2>&1
+  done
   rm -rf /root/tmp/
-  echo -ne "  Do you wish to reboot (recommended!): (Default ${green}Y${normal})"; read reboot
+  echo -ne "  Do you wish to reboot (recommended!): (Default ${green}Y${normal})"
+  read reboot
   case $reboot in
-    [yY] | [yY][Ee][Ss] | "") reboot                 ;;
-    [nN] | [nN][Oo] ) echo "  ${cyan}Skipping reboot${normal} ... " ;;
+  [yY] | [yY][Ee][Ss] | "") reboot ;;
+  [nN] | [nN][Oo]) echo "  ${cyan}Skipping reboot${normal} ... " ;;
   esac
 }
 
 clear
 
 spinner() {
-    local pid=$1
-    local delay=0.25
-    local spinstr='|/-\'
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf " [${bold}${yellow}%c${normal}]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
-    done
-    printf "    \b\b\b\b"
-    echo -ne "${OK}"
+  local pid=$1
+  local delay=0.25
+  local spinstr='|/-\'
+  while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+    local temp=${spinstr#?}
+    printf " [${bold}${yellow}%c${normal}]  " "$spinstr"
+    local spinstr=$temp${spinstr%"$temp"}
+    sleep $delay
+    printf "\b\b\b\b\b\b"
+  done
+  printf "    \b\b\b\b"
+  echo -ne "${OK}"
 }
 
 local_setup=/etc/QuickBox/setup/
@@ -1608,8 +1728,8 @@ local_rplugins=/etc/QuickBox/rtplugins/
 local_themes=/etc/QuickBox/themes/
 local_dashboard=/etc/QuickBox/dashboard/
 
-IFACE=$(ip link show|grep -i broadcast|grep -m1 UP|cut -d: -f 2|cut -d@ -f 1|sed -e 's/ //g');
-HOSTNAME1=$(hostname -s);
+IFACE=$(ip link show | grep -i broadcast | grep -m1 UP | cut -d: -f 2 | cut -d@ -f 1 | sed -e 's/ //g')
+HOSTNAME1=$(hostname -s)
 PORT=$(shuf -i 2000-61000 -n 1)
 PORTEND=$((${PORT} + 1500))
 while [[ "$(netstat -ln | grep ':'"$PORT"'' | grep -c 'LISTEN')" -eq "1" ]]; do PORT="$(shuf -i 2000-61000 -n 1)"; done
@@ -1662,65 +1782,176 @@ echo ""
 echo "${bold}${magenta}QuickBox will now install, this may take between${normal}"
 echo "${bold}${magenta}10 and 45 minutes depending on your systems specs${normal}"
 echo ""
-echo -n "Pulling QuickBox Ecosystem ... ";_repos & spinner $!;echo
-echo -n "Updating system ... ";_updates & spinner $!;echo
-echo -n "Installing all needed dependencies ... ";_depends & spinner $!;echo
+echo -n "Pulling QuickBox Ecosystem ... "
+_repos &
+spinner $!
+echo
+echo -n "Updating system ... "
+_updates &
+spinner $!
+echo
+echo -n "Installing all needed dependencies ... "
+_depends &
+spinner $!
+echo
 if [[ $RTVERSION != 0.9.7 ]]; then
-  echo -n "Installing openssl ... ";_openssl & spinner $!;echo
+  echo -n "Installing openssl ... "
+  _openssl &
+  spinner $!
+  echo
 fi
-echo -n "Setting up system executables ... ";_syscommands & spinner $!;echo
-echo -n "Building required user directories ... ";_skel & spinner $!;echo
+echo -n "Setting up system executables ... "
+_syscommands &
+spinner $!
+echo
+echo -n "Building required user directories ... "
+_skel &
+spinner $!
+echo
 if [[ ${quota} == "yes" ]]; then
-echo -n "Setting up quotas for ${green}/($primaryroot)${normal} mount ... ";_qmount & spinner $!;echo
+  echo -n "Setting up quotas for ${green}/($primaryroot)${normal} mount ... "
+  _qmount &
+  spinner $!
+  echo
 fi
-echo -n "Setting up Limited Shell environment ... ";_lshell & spinner $!;echo
+echo -n "Setting up Limited Shell environment ... "
+_lshell &
+spinner $!
+echo
 if [[ ${ffmpeg} == "yes" ]]; then
-    echo -n "Building ffmpeg from source for screenshots ... ";_ffmpeg & spinner $!;echo
+  echo -n "Building ffmpeg from source for screenshots ... "
+  _ffmpeg &
+  spinner $!
+  echo
 fi
 _apachesudo
-echo -n "Installing xmlrpc-c ... ";_xmlrpc & spinner $!;echo
-echo -n "Installing libtorrent-rakshasa ${green}$LTORRENT${normal} ... ";_libtorrent & spinner $!;echo
-echo -n "Installing rtorrent-${green}$RTVERSION${normal} ... ";_rtorrent & spinner $!;echo
-echo -n "Installing rutorrent into /srv ... ";_rutorrent & spinner $!;echo
-echo -n "Installing rutorrent plugins ... ";_rutorrent-plugins & spinner $!;echo
+echo -n "Installing xmlrpc-c ... "
+_xmlrpc &
+spinner $!
+echo
+echo -n "Installing libtorrent-rakshasa ${green}$LTORRENT${normal} ... "
+_libtorrent &
+spinner $!
+echo
+echo -n "Installing rtorrent-${green}$RTVERSION${normal} ... "
+_rtorrent &
+spinner $!
+echo
+echo -n "Installing rutorrent into /srv ... "
+_rutorrent &
+spinner $!
+echo
+echo -n "Installing rutorrent plugins ... "
+_rutorrent-plugins &
+spinner $!
+echo
 if [[ $DELUGE != NO ]]; then
-  echo -n "Installing deluge ... ";_deluge & spinner $!;echo
-  echo -n "Setting up deluge Web Reverse Proxy ... ";_insdwApache & spinner $!;echo
+  echo -n "Installing deluge ... "
+  _deluge &
+  spinner $!
+  echo
+  echo -n "Setting up deluge Web Reverse Proxy ... "
+  _insdwApache &
+  spinner $!
+  echo
 fi
 if [[ ${tr} == "yes" ]]; then
-	echo -n "Configuring Transmisson ... ";_insTr & spinner $!;echo
-	echo -n "Installing Transmisson Web Control ... ";_insTrWeb & spinner $!;echo
-  echo -n "Setting up Transmission Reverse Proxy ... ";_insTrApache & spinner $!;echo
+  echo -n "Configuring Transmisson ... "
+  _insTr &
+  spinner $!
+  echo
+  echo -n "Installing Transmisson Web Control ... "
+  _insTrWeb &
+  spinner $!
+  echo
+  echo -n "Setting up Transmission Reverse Proxy ... "
+  _insTrApache &
+  spinner $!
+  echo
 fi
 if [[ ${QBVERSION} != "no" ]]; then
-	echo -n "Installing qBittorrent ... ";_qbittorrent & spinner $!;echo
-	echo -n "Setting up qBittorrent Reverse Proxy ... ";_insqBApache & spinner $!;echo
+  echo -n "Installing qBittorrent ... "
+  _qbittorrent &
+  spinner $!
+  echo
+  echo -n "Setting up qBittorrent Reverse Proxy ... "
+  _insqBApache &
+  spinner $!
+  echo
 fi
-echo -n "Installing mktorrent from source ... ";_mktorrent & spinner $!;echo
-echo -n "Installing quickbox dashboard ... ";_dashboard & spinner $!;echo
-echo -n "Building system file indexer (h5ai) ... ";_fileindexer & spinner $!;echo
-echo -n "Setting up seedbox.conf for apache ... ";_apacheconf & spinner $!;echo
-echo -n "Fix SSL Cert for apache ... ";_fix_cert & spinner $!;echo
-echo -n "Installing .rtorrent.rc for ${username} ... ";_rconf & spinner $!;echo
-echo -n "Adjusting fileupload & filemanager plugins ... ";_plugins & spinner $!;echo
-echo -n "Installing autodl-irssi ... ";_autodl & spinner $!;echo
-echo -n "Making ${username} directory structure ... ";_makedirs & spinner $!;echo
-echo -n "Writing ${username} rutorrent config.php file ... ";_ruconf & spinner $!;echo
-echo -n "Installing vsftpd ... ";_installftpd & spinner $!;echo
-echo -n "Setting up vsftpd ... ";_ftpdconfig & spinner $!;echo
-_quickstats;
-_quickconsole;
-echo -n "Setting irssi/rtorrent to start on boot ... ";_boot & spinner $!;echo;
-echo -n "Setting permissions on ${username} ... ";_perms & spinner $!;echo;
+echo -n "Installing mktorrent from source ... "
+_mktorrent &
+spinner $!
+echo
+echo -n "Installing quickbox dashboard ... "
+_dashboard &
+spinner $!
+echo
+echo -n "Building system file indexer (h5ai) ... "
+_fileindexer &
+spinner $!
+echo
+echo -n "Setting up seedbox.conf for apache ... "
+_apacheconf &
+spinner $!
+echo
+echo -n "Fix SSL Cert for apache ... "
+_fix_cert &
+spinner $!
+echo
+echo -n "Installing .rtorrent.rc for ${username} ... "
+_rconf &
+spinner $!
+echo
+echo -n "Adjusting fileupload & filemanager plugins ... "
+_plugins &
+spinner $!
+echo
+echo -n "Installing autodl-irssi ... "
+_autodl &
+spinner $!
+echo
+echo -n "Making ${username} directory structure ... "
+_makedirs &
+spinner $!
+echo
+echo -n "Writing ${username} rutorrent config.php file ... "
+_ruconf &
+spinner $!
+echo
+echo -n "Installing vsftpd ... "
+_installftpd &
+spinner $!
+echo
+echo -n "Setting up vsftpd ... "
+_ftpdconfig &
+spinner $!
+echo
+_quickstats
+_quickconsole
+echo -n "Setting irssi/rtorrent to start on boot ... "
+_boot &
+spinner $!
+echo
+echo -n "Setting permissions on ${username} ... "
+_perms &
+spinner $!
+echo
 if [[ ${bbr} == "yes" ]]; then
-    echo -n "install BBR ... ";_insbbr & spinner $!;echo
+  echo -n "install BBR ... "
+  _insbbr &
+  spinner $!
+  echo
 fi
-if lspci | grep -i bcm > /dev/null; then
-    echo -n "Installing firmware for BCM NIC ... ";_insbcm & spinner $!;echo
+if lspci | grep -i bcm >/dev/null; then
+  echo -n "Installing firmware for BCM NIC ... "
+  _insbcm &
+  spinner $!
+  echo
 fi
 cd
 E=$(date +%s)
-DIFF=$(echo "$E" - "$S"|bc)
-FIN=$(echo "$DIFF" / 60|bc)
+DIFF=$(echo "$E" - "$S" | bc)
+FIN=$(echo "$DIFF" / 60 | bc)
 clear
 _finished
