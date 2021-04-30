@@ -584,11 +584,11 @@ function _depends() {
     yes '' | apt-get install -y fail2ban bc build-essential ed sudo screen zip irssi unzip nano bwm-ng htop nethogs speedtest.cli iotop git \
       dos2unix subversion dstat automake make libtool libcppunit-dev libssl-dev \
       pkg-config libxml2-dev libcurl3 libcurl4-openssl-dev libsigc++-2.0-dev \
-      apache2-utils autoconf cron curl libapache2-mod-scgi libapache2-mod-fastcgi libapache2-mod-fcgid libapache2-mod-geoip libapache2-mod-php7.3 \
-      libncurses5-dev yasm pcregrep apache2 php-net-socket libapache2-mod-php7.3 \
-      php-memcached memcached php7.3 php7.3-cli php7.3-curl php7.3-fpm php7.3-gd php7.3-geoip \
-      php7.3-json php7.3-mbstring php7.3-msgpack php7.3-mysql php7.3-opcache php7.3-xml php7.3-xmlrpc \
-      php7.3-zip libfcgi0ldbl mcrypt libmcrypt-dev \
+      apache2-utils autoconf cron curl libapache2-mod-scgi libapache2-mod-fastcgi libapache2-mod-fcgid libapache2-mod-geoip libapache2-mod-php7.4 \
+      libncurses5-dev yasm pcregrep apache2 php-net-socket libapache2-mod-php7.4 \
+      php7.4-memcached memcached php7.4 php7.4-cli php7.4-curl php7.4-fpm php7.4-gd php7.4-geoip \
+      php7.4-json php7.4-mbstring php7.4-msgpack php7.4-mysql php7.4-opcache php7.4-xml php7.4-xmlrpc \
+      php7.4-zip libfcgi0ldbl mcrypt libmcrypt-dev \
       python3-lxml python-lxml fontconfig comerr-dev ca-certificates libfontconfig1-dev \
       libdbd-mysql-perl libdbi-perl libfontconfig1 rar unrar mediainfo ifstat \
       ttf-mscorefonts-installer checkinstall dtach cfv libarchive-zip-perl \
@@ -601,13 +601,13 @@ function _depends() {
       screen zip irssi unzip nano bwm-ng htop iotop git \
       dos2unix subversion dstat automake make libtool libcppunit-dev \
       pkg-config libxml2-dev libcurl4-openssl-dev libsigc++-2.0-dev \
-      apache2-utils autoconf cron curl libapache2-mod-geoip libapache2-mod-php7.3 \
+      apache2-utils autoconf cron curl libapache2-mod-geoip libapache2-mod-php7.4 \
       libncurses5-dev yasm pcregrep apache2 php-net-socket \
-      libdbd-mysql-perl libdbi-perl php-memcached memcached php7.3 php7.3-cli php7.3-curl php7.3-fpm php7.3-gd php7.3-geoip \
-      php7.3-json php7.3-mbstring php7.3-msgpack php7.3-mysql php7.3-opcache php7.3-xml php7.3-xmlrpc \
-      php7.3-zip libfcgi0ldbl mcrypt libmcrypt-dev \
+      libdbd-mysql-perl libdbi-perl php7.4-memcached memcached php7.4 php7.4-cli php7.4-curl php7.4-fpm php7.4-gd php7.4-geoip \
+      php7.4-json php7.4-mbstring php7.4-msgpack php7.4-mysql php7.4-opcache php7.4-xml php7.4-xmlrpc \
+      php7.4-zip libfcgi0ldbl mcrypt libmcrypt-dev \
       fontconfig comerr-dev ca-certificates libfontconfig1-dev \
-      libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.3 \
+      libfontconfig1 rar unrar mediainfo ifstat libapache2-mod-php7.4 \
       python3-lxml python-lxml ttf-mscorefonts-installer checkinstall dtach libarchive-zip-perl \
       libnet-ssleay-perl openjdk-8-jre-headless openjdk-8-jre openjdk-8-jdk libxslt1-dev \
       libxslt1.1 libxml2 libffi-dev libhtml-parser-perl libxml-libxml-perl \
@@ -1323,7 +1323,7 @@ function _apacheconf() {
     -e "s/;opcache.enable=0/opcache.enable=1/" \
     -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
     -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-    -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.3/fpm/php.ini
+    -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.4/fpm/php.ini
   sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
     -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
     -e "s/expose_php = On/expose_php = Off/" \
@@ -1332,10 +1332,10 @@ function _apacheconf() {
     -e "s/;opcache.enable=0/opcache.enable=1/" \
     -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
     -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-    -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.3/apache2/php.ini
+    -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.4/apache2/php.ini
 
   # ensure opcache module is activated
-  phpenmod -v 7.3 opcache >>"${OUTTO}" 2>&1
+  phpenmod -v 7.4 opcache >>"${OUTTO}" 2>&1
 
   # these modules are purely experimental
   #a2enmod proxy_fcgi >>"${OUTTO}" 2>&1
@@ -1347,9 +1347,9 @@ function _apacheconf() {
   a2enmod headers >>"${OUTTO}" 2>&1
   a2enmod fastcgi >>"${OUTTO}" 2>&1
   a2enmod proxy_fcgi setenvif >>"${OUTTO}" 2>&1
-  a2enconf php7.3-fpm >>"${OUTTO}" 2>&1
+  a2enconf php7.4-fpm >>"${OUTTO}" 2>&1
 
-  #sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.3/apache2/php.ini
+  #sed -i 's/memory_limit = 128M/memory_limit = 768M/g' /etc/php/7.4/apache2/php.ini
 }
 
 # function to fix cert
@@ -1681,7 +1681,7 @@ function _finished() {
   echo "#   ${cyan}(Also works for FTP:5757/SSH:4747)${normal}"
   echo "#   If you need to restart rtorrent/irssi, you can type 'reload'"
   echo "#   https://${username}:${passwd}@${ip} (Also works for FTP:5757/SSH:4747)" >${username}.info
-  echo "#   Reloading: ${green}sshd${normal}, ${green}apache${normal}, ${green}memcached${normal}, ${green}php7.3${normal}, ${green}vsftpd${normal} and ${green}fail2ban${normal}"
+  echo "#   Reloading: ${green}sshd${normal}, ${green}apache${normal}, ${green}memcached${normal}, ${green}php7.4${normal}, ${green}vsftpd${normal} and ${green}fail2ban${normal}"
   echo '################################################################################################'
   echo
 
@@ -1691,7 +1691,7 @@ function _finished() {
   https://${username}:${passwd}@${ip} (Also works for FTP:5757/SSH:4747)
 EOF
   rm -rf "$0" >>"${OUTTO}" 2>&1
-  for i in ssh apache2 php7.3-fpm vsftpd fail2ban quota memcached cron; do
+  for i in ssh apache2 php7.4-fpm vsftpd fail2ban quota memcached cron; do
     service $i restart >>"${OUTTO}" 2>&1
     systemctl enable $i >>"${OUTTO}" 2>&1
   done
