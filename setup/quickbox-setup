@@ -510,6 +510,7 @@ function _depends() {
     elif [[ "$CODENAME" =~ ("focal") ]]; then
       wget http://mirrors.kernel.org/ubuntu/pool/universe/s/scgi/libapache2-mod-scgi_1.13-1.1build1_amd64.deb
       dpkg -i libapache2-mod-scgi_1.13-1.1build1_amd64.deb
+      apt-get --fix-broken install
       rm libapache2-mod-scgi_1.13-1.1build1_amd64.deb
       apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 python2 python2-dev
       curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
