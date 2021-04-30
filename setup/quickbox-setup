@@ -325,7 +325,7 @@ function _askdashtheme() {
   echo
 }
 
-# ask what rtorrent version (9.1)
+# ask what rtorrent version (9.6)
 function _askrtorrent() {
   echo -e "1) rtorrent ${green}0.9.6 (with ipv6 support)${normal}"
   echo -e "2) rtorrent ${green}0.9.7 (with ipv6 support)${normal}"
@@ -578,7 +578,7 @@ function _updates() {
 
 }
 
-# package and repo addition _install softwares and packages_
+# package and repo addition _install software and packages_
 function _depends() {
   if [[ $DISTRO == Debian ]]; then
     yes '' | apt-get install -y fail2ban bc build-essential ed sudo screen zip irssi unzip nano bwm-ng htop nethogs speedtest.cli iotop git \
@@ -751,18 +751,18 @@ function _ffmpeg() {
     mkdir /root/tmp
     cd /root/tmp
     if [[ -d /root/tmp/ffmpeg ]]; then rm -rf ffmpeg; fi
-    git clone --depth 1 -b release/4.0 https://github.com/FFmpeg/FFmpeg.git ffmpeg >>"${OUTTO}" 2>&1
+    git clone --depth 1 -b release/4.4 https://github.com/FFmpeg/FFmpeg.git ffmpeg >>"${OUTTO}" 2>&1
     git clone git://github.com/yasm/yasm.git ffmpeg/yasm >>"${OUTTO}" 2>&1
-    git clone https://github.com/yixia/x264.git ffmpeg/x264 >>"${OUTTO}" 2>&1
-    hg clone https://bitbucket.org/multicoreware/x265 ffmpeg/x265 >>"${OUTTO}" 2>&1
+    git clone --depth 1 https://code.videolan.org/videolan/x264.git ffmpeg/x264 >>"${OUTTO}" 2>&1
+    git clone https://bitbucket.org/multicoreware/x265_git.git ffmpeg/x265 >>"${OUTTO}" 2>&1
     ############################################################################
     ####---- Github Mirror source ----####
     #git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg >>"${OUTTO}" 2>&1
     ############################################################################
     cd ffmpeg
-    wget -q https://www.nasm.us/pub/nasm/releasebuilds/2.13/nasm-2.13.tar.gz
-    tar zxvf nasm-2.13.tar.gz >>"${OUTTO}" 2>&1
-    cd nasm-2.13
+    wget -q https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.gz
+    tar zxvf nasm-2.15.05.tar.gz >>"${OUTTO}" 2>&1
+    cd nasm-2.15.05
     ./autogen.sh >>"${OUTTO}" 2>&1
     ./configure >>"${OUTTO}" 2>&1
     make -j${MAXCPUS} >>"${OUTTO}" 2>&1
