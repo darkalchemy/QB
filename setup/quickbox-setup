@@ -507,20 +507,20 @@ function _depends() {
 
     if [[ "$CODENAME" =~ ("bionic") ]]; then
       apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 cfv python-pip python-dev \
-                    python-software-properties libapache2-mod-scgi
+                    python-software-properties libapache2-mod-scgi >>"${OUTTO}" 2>&1
     elif [[ "$CODENAME" =~ ("focal") ]]; then
       wget -q http://mirrors.kernel.org/ubuntu/pool/universe/s/scgi/libapache2-mod-scgi_1.13-1.1build1_amd64.deb
-      dpkg -i libapache2-mod-scgi_1.13-1.1build1_amd64.deb
-      apt-get --fix-broken install
+      dpkg -i libapache2-mod-scgi_1.13-1.1build1_amd64.deb >>"${OUTTO}" 2>&1
+      apt-get --fix-broken install >>"${OUTTO}" 2>&1
       rm libapache2-mod-scgi_1.13-1.1build1_amd64.deb
       apt-get -y -f --allow-unauthenticated install libssl-dev libapache2-mod-fcgid libcurl4 python2 python2-dev \
-                    software-properties-common
-      curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+                    software-properties-common >>"${OUTTO}" 2>&1
+      curl -s https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
       python2 get-pip.py
       pip install cfv
     else
       apt-get -y -f --allow-unauthenticated install libssl-dev=1.0.* libapache2-mod-fastcgi libcurl3 cfv \
-                    python-software-properties libapache2-mod-scgi
+                    python-software-properties libapache2-mod-scgi >>"${OUTTO}" 2>&1
     fi
   fi
 }
