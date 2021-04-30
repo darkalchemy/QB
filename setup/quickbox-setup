@@ -1109,7 +1109,7 @@ function _mktorrent() {
   if [[ -d /root/tmp ]]; then rm -r tmp;fi
   mkdir /root/tmp && cd /root/tmp
   mktorrent_version=1.1
-  wget --quiet https://github.com/Rudde/mktorrent/archive/v$mktorrent_version.zip -O mktorrent.zip  >>"${OUTTO}" 2>&1
+  wget --quiet https://github.com/Rudde/mktorrent/archive/refs/tags/v$mktorrent_version.zip -O mktorrent.zip  >>"${OUTTO}" 2>&1
   unzip -o mktorrent.zip  >>"${OUTTO}" 2>&1
   cd mktorrent-1.1
   make >>"${OUTTO}" 2>&1
