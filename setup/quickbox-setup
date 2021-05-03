@@ -1519,7 +1519,7 @@ function _ftpdconfig() {
   echo "pasv_address="$IP >>/etc/vsftpd.conf
   iptables -I INPUT -p tcp --destination-port 10090:10100 -j ACCEPT
 
-  echo "" >/etc/vsftpd.chroot_list
+  printf "${username}" >/etc/vsftpd.chroot_list
 }
 
 # The following function makes necessary changes to Network and TZ settings needed for
@@ -1934,8 +1934,6 @@ spinner $!
 echo
 echo -n "Setting up vsftpd ... "
 _ftpdconfig &
-echo -n "Writing ${username} /etc/vsftpd.chroot_list file ... "
-echo "$username" >> /etc/vsftpd.chroot_list
 spinner $!
 echo
 _quickstats
