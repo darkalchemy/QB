@@ -1934,6 +1934,8 @@ spinner $!
 echo
 echo -n "Setting up vsftpd ... "
 _ftpdconfig &
+echo -n "Writing ${username} /etc/vsftpd.chroot_list file ... "
+echo "$username" >> /etc/vsftpd.chroot_list
 spinner $!
 echo
 _quickstats
