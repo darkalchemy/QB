@@ -1258,7 +1258,7 @@ function _mktorrent() {
   if [[ -d /root/tmp ]]; then rm -r tmp; fi
   mkdir /root/tmp && cd /root/tmp
   mktorrent_version=1.1
-  wget --quiet https://github.com/Rudde/mktorrent/archive/refs/tags/v$mktorrent_version.zip -O mktorrent.zip >>"${OUTTO}" 2>&1
+  wget -q https://github.com/Rudde/mktorrent/archive/refs/tags/v${mktorrent_version}.zip -O mktorrent.zip >>"${OUTTO}" 2>&1
   unzip -o mktorrent.zip >>"${OUTTO}" 2>&1
   cd mktorrent-1.1
   make >>"${OUTTO}" 2>&1
@@ -1294,7 +1294,7 @@ function _dashboard() {
 # function to install _h5ai file indexer
 function _fileindexer() {
   cd /srv/rutorrent/home
-  wget --quiet https://release.larsjung.de/h5ai/h5ai-0.30.0.zip >>"${OUTTO}" 2>&1
+  wget -q https://release.larsjung.de/h5ai/h5ai-0.30.0.zip >>"${OUTTO}" 2>&1
   unzip h5ai-0.30.0.zip >>"${OUTTO}" 2>&1
   rm –rf h5ai-0.30.0.zip >>"${OUTTO}" 2>&1
   chmod 775 -R _h5ai/private/cache && chmod 775 -R _h5ai/public/cache
@@ -1446,7 +1446,7 @@ function _autodl() {
   mkdir -p "/home/${username}/.irssi/scripts/autorun/" >>"${OUTTO}" 2>&1
   cd "/home/${username}/.irssi/scripts/"
   # Grab the most recent version of AutoDL-trackers
-  curl -sL http://git.io/vlcND | grep -Po '(?<="browser_download_url": ")(.*-v[\d.]+.zip)' | xargs wget --quiet -O autodl-irssi.zip '{}'
+  curl -sL http://git.io/vlcND | grep -Po '(?<="browser_download_url": ")(.*-v[\d.]+.zip)' | xargs wget -q -O autodl-irssi.zip '{}'
   unzip -o autodl-irssi.zip >>"${OUTTO}" 2>&1
   rm autodl-irssi.zip
   cp -f autodl-irssi.pl autorun/
