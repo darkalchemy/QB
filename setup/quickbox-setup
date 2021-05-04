@@ -735,7 +735,12 @@ function _qmount() {
 
 # Setup LShell configuration file
 function _lshell() {
-  apt-get install -y lshell >>/dev/null 2>&1
+  mkdir /root/tmp
+  cd /root/tmp
+  https://github.com/ghantoos/lshell.git
+  cd lshell
+  python setup.py install --no-compile --install-scripts=/usr/bin/
+  echo -n "/usr/bin/lshell" >/etc/shells
   cp ${local_setup}templates/lshell.conf.template /etc/lshell.conf
 }
 
@@ -1518,8 +1523,7 @@ function _ftpdconfig() {
   sed -i 's/^\(pasv_max_port=\).*/\110100/' /etc/vsftpd.conf
   echo "pasv_address="$IP >>/etc/vsftpd.conf
   iptables -I INPUT -p tcp --destination-port 10090:10100 -j ACCEPT
-
-  printf "${username}" >/etc/vsftpd.chroot_list
+  echo -n "${username}" >/etc/vsftpd.chroot_list
 }
 
 # The following function makes necessary changes to Network and TZ settings needed for
