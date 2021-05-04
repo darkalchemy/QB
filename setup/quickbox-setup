@@ -737,9 +737,9 @@ function _qmount() {
 function _lshell() {
   mkdir /root/tmp
   cd /root/tmp
-  git clone https://github.com/ghantoos/lshell.git
+  git clone https://github.com/ghantoos/lshell.git >>"${OUTTO}" 2>&1
   cd lshell
-  python setup.py install --no-compile --install-scripts=/usr/bin/
+  python setup.py install --no-compile --install-scripts=/usr/bin/ >>"${OUTTO}" 2>&1
   echo -n "/usr/bin/lshell" >/etc/shells
   cp ${local_setup}templates/lshell.conf.template /etc/lshell.conf
 }
