@@ -1523,7 +1523,7 @@ function _ftpdconfig() {
   sed -i 's/^\(pasv_max_port=\).*/\110100/' /etc/vsftpd.conf
   echo "pasv_address="$IP >>/etc/vsftpd.conf
   iptables -I INPUT -p tcp --destination-port 10090:10100 -j ACCEPT
-  echo -n "${username}" >/etc/vsftpd.chroot_list
+  echo -n "${username}\n" >/etc/vsftpd.chroot_list
 }
 
 # The following function makes necessary changes to Network and TZ settings needed for
