@@ -740,7 +740,7 @@ function _lshell() {
   git clone https://github.com/ghantoos/lshell.git >>"${OUTTO}" 2>&1
   cd lshell
   python setup.py install --no-compile --install-scripts=/usr/bin/ >>"${OUTTO}" 2>&1
-  echo -n "/usr/bin/lshell" >/etc/shells
+  echo -n "/usr/bin/lshell" >>/etc/shells
   cp ${local_setup}templates/lshell.conf.template /etc/lshell.conf
 }
 
